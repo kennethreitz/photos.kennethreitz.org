@@ -12,5 +12,6 @@ dependencies = [
     "django-storages>=1.14.6",
     "exifread>=3.5.1",
     "pillow>=12.2.0",
+    "psycopg[binary]>=3.3.3",
     "redis>=7.4.0",
 ]
