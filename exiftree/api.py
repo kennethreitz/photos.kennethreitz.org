@@ -323,7 +323,7 @@ async def login(data: LoginInput) -> TokenSchema:
     return TokenSchema(access=tokens['access'], refresh=tokens['refresh'])
 
 
-@auth_router.get("/me", auth=[JWTAuthentication()], permissions=[IsAuthenticated()])
+@auth_router.get("/me", auth=[JWTAuthentication()], guards=[IsAuthenticated()])
 async def me(request: Request) -> UserDetailSchema:
     u = request.user
     image_count = await Image.objects.filter(user=u).acount()
@@ -336,7 +336,7 @@ async def me(request: Request) -> UserDetailSchema:
     )
 
 
-@auth_router.patch("/me", auth=[JWTAuthentication()], permissions=[IsAuthenticated()])
+@auth_router.patch("/me", auth=[JWTAuthentication()], guards=[IsAuthenticated()])
 async def update_profile(request: Request, data: ProfileUpdateInput) -> UserDetailSchema:
     u = request.user
     if data.bio is not None:
@@ -429,7 +429,7 @@ async def get_image(image_id: str) -> ImageSchema:
 @images_router.post(
     "/upload",
     auth=[JWTAuthentication()],
-    permissions=[IsAuthenticated()],
+    guards=[IsAuthenticated()],
 )
 async def upload_image(
     request: Request,
@@ -466,7 +466,7 @@ async def upload_image(
 @images_router.patch(
     "/{image_id}",
     auth=[JWTAuthentication()],
-    permissions=[IsAuthenticated()],
+    guards=[IsAuthenticated()],
 )
 async def update_image(request: Request, image_id: str, data: ImageUpdateInput) -> ImageSchema:
     img = await Image.objects.select_related('user').aget(id=image_id)
@@ -492,7 +492,7 @@ async def update_image(request: Request, image_id: str, data: ImageUpdateInput) 
 @images_router.delete(
     "/{image_id}",
     auth=[JWTAuthentication()],
-    permissions=[IsAuthenticated()],
+    guards=[IsAuthenticated()],
 )
 async def delete_image(request: Request, image_id: str):
     img = await Image.objects.aget(id=image_id)
@@ -565,7 +565,7 @@ async def get_collection(collection_id: str) -> CollectionDetailSchema:
 @collections_router.post(
     "",
     auth=[JWTAuthentication()],
-    permissions=[IsAuthenticated()],
+    guards=[IsAuthenticated()],
 )
 async def create_collection(request: Request, data: CollectionCreateInput) -> CollectionSchema:
     c = await Collection.objects.acreate(
@@ -587,7 +587,7 @@ async def create_collection(request: Request, data: CollectionCreateInput) -> Co
 @collections_router.patch(
     "/{collection_id}",
     auth=[JWTAuthentication()],
-    permissions=[IsAuthenticated()],
+    guards=[IsAuthenticated()],
 )
 async def update_collection(
     request: Request, collection_id: str, data: CollectionUpdateInput,
@@ -619,7 +619,7 @@ async def update_collection(
 @collections_router.delete(
     "/{collection_id}",
     auth=[JWTAuthentication()],
-    permissions=[IsAuthenticated()],
+    guards=[IsAuthenticated()],
 )
 async def delete_collection(request: Request, collection_id: str):
     c = await Collection.objects.aget(id=collection_id)
@@ -632,7 +632,7 @@ async def delete_collection(request: Request, collection_id: str):
 @collections_router.post(
     "/{collection_id}/images/{image_id}",
     auth=[JWTAuthentication()],
-    permissions=[IsAuthenticated()],
+    guards=[IsAuthenticated()],
 )
 async def add_image_to_collection(request: Request, collection_id: str, image_id: str):
     c = await Collection.objects.aget(id=collection_id)
@@ -652,7 +652,7 @@ async def add_image_to_collection(request: Request, collection_id: str, image_id
 @collections_router.delete(
     "/{collection_id}/images/{image_id}",
     auth=[JWTAuthentication()],
-    permissions=[IsAuthenticated()],
+    guards=[IsAuthenticated()],
 )
 async def remove_image_from_collection(request: Request, collection_id: str, image_id: str):
     c = await Collection.objects.aget(id=collection_id)
@@ -722,7 +722,7 @@ async def group_images(slug: str) -> list[ImageListSchema]:
 @groups_router.post(
     "/{slug}/join",
     auth=[JWTAuthentication()],
-    permissions=[IsAuthenticated()],
+    guards=[IsAuthenticated()],
 )
 async def join_group(request: Request, slug: str):
     g = await Group.objects.aget(slug=slug)
@@ -741,7 +741,7 @@ async def join_group(request: Request, slug: str):
 @groups_router.post(
     "/{slug}/leave",
     auth=[JWTAuthentication()],
-    permissions=[IsAuthenticated()],
+    guards=[IsAuthenticated()],
 )
 async def leave_group(request: Request, slug: str):
     deleted, _ = await GroupMembership.objects.filter(
@@ -755,7 +755,7 @@ async def leave_group(request: Request, slug: str):
 @groups_router.post(
     "/{slug}/images/{image_id}",
     auth=[JWTAuthentication()],
-    permissions=[IsAuthenticated()],
+    guards=[IsAuthenticated()],
 )
 async def submit_image_to_group(request: Request, slug: str, image_id: str):
     g = await Group.objects.aget(slug=slug)
