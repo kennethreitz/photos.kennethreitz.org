@@ -281,16 +281,16 @@ def _public_images_qs():
 # API setup
 # ---------------------------------------------------------------------------
 
-api = BoltAPI(prefix="/api")
+api = BoltAPI()
 
-auth_router = Router(prefix="/auth", tags=["auth"])
-cameras_router = Router(prefix="/cameras", tags=["cameras"])
-lenses_router = Router(prefix="/lenses", tags=["lenses"])
-images_router = Router(prefix="/images", tags=["images"])
-users_router = Router(prefix="/users", tags=["users"])
-collections_router = Router(prefix="/collections", tags=["collections"])
-groups_router = Router(prefix="/groups", tags=["groups"])
-search_router = Router(prefix="/search", tags=["search"])
+auth_router = Router(prefix="/api/auth", tags=["auth"])
+cameras_router = Router(prefix="/api/cameras", tags=["cameras"])
+lenses_router = Router(prefix="/api/lenses", tags=["lenses"])
+images_router = Router(prefix="/api/images", tags=["images"])
+users_router = Router(prefix="/api/users", tags=["users"])
+collections_router = Router(prefix="/api/collections", tags=["collections"])
+groups_router = Router(prefix="/api/groups", tags=["groups"])
+search_router = Router(prefix="/api/search", tags=["search"])
 
 
 # ---------------------------------------------------------------------------
