@@ -836,3 +836,6 @@ api.include_router(users_router)
 api.include_router(collections_router)
 api.include_router(groups_router)
 api.include_router(search_router)
+
+# Mount Django views (admin, templates) as fallback for non-API routes
+api.mount_django("/", clear_root_path=True)
