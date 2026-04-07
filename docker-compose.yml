@@ -5,6 +5,7 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+      - /app/.venv
     env_file:
       - path: .env
         required: false
@@ -23,6 +24,7 @@ services:
     command: uv run celery -A exiftree worker -l info
     volumes:
       - .:/app
+      - /app/.venv
     env_file:
       - path: .env
         required: false
