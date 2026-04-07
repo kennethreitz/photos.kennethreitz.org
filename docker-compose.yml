@@ -3,6 +3,8 @@ services:
     build: .
     ports:
       - "8000:8000"
+    volumes:
+      - .:/app
     env_file:
       - path: .env
         required: false
@@ -19,6 +21,8 @@ services:
   worker:
     build: .
     command: uv run celery -A exiftree worker -l info
+    volumes:
+      - .:/app
     env_file:
       - path: .env
         required: false
