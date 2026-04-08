@@ -153,7 +153,9 @@ if os.environ.get("AWS_STORAGE_BUCKET_NAME") or os.environ.get("BUCKET_NAME"):
     AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID", "")
     AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY", "")
     AWS_S3_OBJECT_PARAMETERS = {"CacheControl": "max-age=86400"}
-    AWS_DEFAULT_ACL = None
+    AWS_S3_ADDRESSING_STYLE = "virtual"
+    AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.fly.storage.tigris.dev"
+    AWS_DEFAULT_ACL = "public-read"
     AWS_QUERYSTRING_AUTH = False
 
 # Celery
