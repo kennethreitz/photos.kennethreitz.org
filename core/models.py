@@ -84,6 +84,10 @@ class Image(models.Model):
     visibility = models.CharField(
         max_length=10, choices=Visibility.choices, default=Visibility.PUBLIC
     )
+    content_hash = models.CharField(
+        max_length=64, blank=True, db_index=True,
+        help_text="SHA-256 hash of the original file for deduplication"
+    )
     view_count = models.PositiveIntegerField(default=0)
     is_processing = models.BooleanField(default=True)
     upload_date = models.DateTimeField(auto_now_add=True, db_index=True)

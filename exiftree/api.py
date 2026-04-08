@@ -449,9 +449,20 @@ async def upload_image(
     from django.core.files.base import ContentFile
     from asgiref.sync import sync_to_async
 
+    import hashlib
+
     contents = await image.read()
     if len(contents) > settings.MAX_UPLOAD_SIZE:
         return Response({"detail": "File too large"}, status_code=400)
+
+    content_hash = hashlib.sha256(contents).hexdigest()
+
+    # Check for duplicate
+    existing = await Image.objects.filter(
+        user=request.user, content_hash=content_hash
+    ).afirst()
+    if existing:
+        return Response({"detail": "Duplicate image", "id": str(existing.id)}, status_code=409)
 
     slug = slugify(title) if title else slugify(image.filename.rsplit('.', 1)[0])
 
@@ -463,6 +474,7 @@ async def upload_image(
             description=description,
             slug=slug,
             original=ContentFile(contents, name=image.filename),
+            content_hash=content_hash,
             is_processing=True,
         )
         process_image_task.apply_async(args=[str(img.id)], ignore_result=True)

@@ -39,6 +39,13 @@
           } catch(e) {}
           item.status = 'done';
           item.progress = 100;
+        } else if (xhr.status === 409) {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            item.id = data.id;
+          } catch(e) {}
+          item.status = 'duplicate';
+          item.progress = 100;
         } else {
           try {
             const data = JSON.parse(xhr.responseText);
@@ -103,6 +110,9 @@
             </template>
             <template x-if="item.status === 'done'">
               <a :href="'/images/' + item.id + '/'" style="color: #4c4;">View</a>
+            </template>
+            <template x-if="item.status === 'duplicate'">
+              <a :href="'/images/' + item.id + '/'" style="color: var(--text-muted);">Already uploaded</a>
             </template>
             <template x-if="item.status === 'error'">
               <span style="color: #f44;" x-text="item.error"></span>
