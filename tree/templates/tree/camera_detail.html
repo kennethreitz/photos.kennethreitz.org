@@ -6,42 +6,29 @@
   <p>{{ camera.manufacturer }}</p>
 </div>
 
-<div x-data="{
-  images: [],
-  selected: -1,
-  async init() {
-    const res = await fetch('/api/cameras/{{ camera.id }}/images');
-    this.images = await res.json();
-  },
-  nav(dir) {
-    if (!this.images.length) return;
-    this.selected = Math.max(0, Math.min(this.images.length - 1, this.selected + dir));
-    this.$refs['card-' + this.selected]?.scrollIntoView({ block: 'nearest' });
-  },
-  open() {
-    if (this.selected >= 0) openLightbox(this.images, this.selected);
-  }
-}" @keydown.right.window="nav(1)" @keydown.left.window="nav(-1)" @keydown.enter.window="open()">
-  <div class="image-grid">
-    <template x-for="(img, i) in images" :key="img.id">
-      <div>
-        <div class="image-card" :class="selected === i ? 'image-card-selected' : ''" :ref="'card-' + i" @mouseenter="selected = i" @click="openLightbox(images, i)" style="cursor: pointer;">
-          <img :src="img.thumbnail_medium || img.thumbnail_small" :alt="img.title">
-          <div class="overlay">
-            <div class="exif-row">
-              <div class="exif-left"><span x-text="img.camera" x-show="img.camera"></span></div>
-              <div class="exif-right">
-                <span x-show="img.focal_length" x-text="img.focal_length + 'mm'"></span>
-                <span x-show="img.aperture" x-text="'f/' + img.aperture"></span>
-                <span x-show="img.iso" x-text="'ISO ' + img.iso"></span>
-              </div>
-            </div>
+<div class="image-grid">
+  {% for img in images %}
+  <div>
+    <a href="/images/{{ img.id }}/" class="image-card">
+      {% if img.thumbnail_medium %}<img src="{{ img.thumbnail_medium.url }}" alt="{{ img.title }}">
+      {% elif img.thumbnail_small %}<img src="{{ img.thumbnail_small.url }}" alt="{{ img.title }}">{% endif %}
+      <div class="overlay">
+        <div class="exif-row">
+          <div class="exif-left">
+            {% if img.exif and img.exif.lens %}<span>{{ img.exif.lens.display_name }}</span>{% endif %}
+          </div>
+          <div class="exif-right">
+            {% if img.exif.focal_length %}<span>{{ img.exif.focal_length }}mm</span>{% endif %}
+            {% if img.exif.aperture %}<span>f/{{ img.exif.aperture }}</span>{% endif %}
+            {% if img.exif.iso %}<span>ISO {{ img.exif.iso }}</span>{% endif %}
           </div>
         </div>
-        {% if not SINGLE_TENANT %}<a :href="'/@' + img.user" class="image-card-user" x-text="'@' + img.user"></a>{% endif %}
       </div>
-    </template>
+    </a>
+    {% if not SINGLE_TENANT %}<a href="/@{{ img.user.username }}" class="image-card-user">@{{ img.user.username }}</a>{% endif %}
   </div>
-  <div class="empty" x-show="images.length === 0">No images yet for this camera.</div>
+  {% empty %}
+  <div class="empty" style="grid-column: 1 / -1;">No images yet for this camera.</div>
+  {% endfor %}
 </div>
 {% endblock %}

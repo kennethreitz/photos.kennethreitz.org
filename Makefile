@@ -9,7 +9,7 @@ sync:
 run: sync
 	fly proxy 5432 -a exiftree-db &
 	redis-server --daemonize yes 2>/dev/null || true
-	uv run celery -A exiftree worker -l info -c 4 --detach --pidfile /tmp/exiftree-celery.pid 2>/dev/null || true
+	uv run celery -A exiftree worker -l info -c 2 --detach --pidfile /tmp/exiftree-celery.pid 2>/dev/null || true
 	sleep 1
 	uv run python manage.py collectstatic --noinput 2>/dev/null
 	uv run python manage.py runbolt --dev

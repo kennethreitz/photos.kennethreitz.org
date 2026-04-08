@@ -6,55 +6,32 @@
   <p>Browse photography by lens</p>
 </div>
 
-<div x-data="{
-  lenses: [],
-  allLenses: [],
-  brands: [],
-  selectedBrand: '',
-  query: '',
-  async init() {
-    const res = await fetch('/api/lenses');
-    this.allLenses = await res.json();
-    this.brands = [...new Set(this.allLenses.map(l => l.manufacturer))].sort();
-    this.filter();
-  },
-  filter() {
-    let filtered = this.allLenses;
-    if (this.selectedBrand) filtered = filtered.filter(l => l.manufacturer === this.selectedBrand);
-    if (this.query) {
-      const q = this.query.toLowerCase();
-      filtered = filtered.filter(l => l.display_name.toLowerCase().includes(q));
-    }
-    this.lenses = filtered;
-  }
-}">
-  <!-- Brand pills -->
-  <div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
-    <button class="brand-pill" :class="!selectedBrand ? 'brand-pill-active' : ''"
-            @click="selectedBrand = ''; filter()">All</button>
-    <template x-for="b in brands" :key="b">
-      <button class="brand-pill" :class="selectedBrand === b ? 'brand-pill-active' : ''"
-              @click="selectedBrand = b; filter()" x-text="b"></button>
-    </template>
-  </div>
+<div style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem;">
+  <a href="{% url 'tree:lens-list' %}" class="brand-pill {% if not selected_brand %}brand-pill-active{% endif %}">All</a>
+  {% for b in brands %}
+  <a href="{% url 'tree:lens-list' %}?brand={{ b }}" class="brand-pill {% if selected_brand == b %}brand-pill-active{% endif %}">{{ b }}</a>
+  {% endfor %}
+</div>
 
-  <!-- Search -->
-  <input type="text" x-model="query" @input="filter()" placeholder="Filter lenses..."
-    style="width: 100%; max-width: 400px; padding: 0.5rem 0.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); margin-bottom: 1.5rem;">
+<form method="get" style="margin-bottom: 1.5rem;">
+  {% if selected_brand %}<input type="hidden" name="brand" value="{{ selected_brand }}">{% endif %}
+  <input type="text" name="q" value="{{ query }}" placeholder="Filter lenses..."
+    style="width: 100%; max-width: 400px; padding: 0.5rem 0.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text);">
+</form>
 
-  <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;" x-text="lenses.length + ' lenses'"></p>
+<p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">{{ lenses|length }} lenses</p>
 
-  <div class="gear-grid">
-    <template x-for="l in lenses" :key="l.id">
-      <a :href="'/lenses/' + l.slug + '/'" class="gear-card" style="color: inherit;">
-        <h3 x-text="l.display_name"></h3>
-        <div>
-          <span class="count" x-text="l.image_count + ' images'"></span>
-          <span class="count" x-show="l.max_aperture" x-text="' · f/' + l.max_aperture"></span>
-        </div>
-      </a>
-    </template>
-    <div class="empty" x-show="lenses.length === 0" style="grid-column: 1 / -1;">No lenses match your filter.</div>
-  </div>
+<div class="gear-grid">
+  {% for l in lenses %}
+  <a href="/lenses/{{ l.slug }}/" class="gear-card" style="color: inherit;">
+    <h3>{{ l.display_name }}</h3>
+    <div>
+      <span class="count">{{ l.image_count }} images</span>
+      {% if l.max_aperture %}<span class="count"> · f/{{ l.max_aperture }}</span>{% endif %}
+    </div>
+  </a>
+  {% empty %}
+  <div class="empty" style="grid-column: 1 / -1;">No lenses match your filter.</div>
+  {% endfor %}
 </div>
 {% endblock %}

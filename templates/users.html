@@ -6,32 +6,21 @@
   <p>Photographers on ExifTree</p>
 </div>
 
-<div x-data="{
-  users: [],
-  query: '',
-  async init() {
-    await this.search();
-  },
-  async search() {
-    const params = this.query ? '?q=' + encodeURIComponent(this.query) : '';
-    const res = await fetch('/api/users' + params);
-    this.users = await res.json();
-  }
-}">
-  <input type="text" x-model="query" @input.debounce.300ms="search()" placeholder="Search users..."
-    style="width: 100%; max-width: 400px; padding: 0.5rem 0.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); margin-bottom: 1.5rem;">
+<form method="get" style="margin-bottom: 1.5rem;">
+  <input type="text" name="q" value="{{ query }}" placeholder="Search users..."
+    style="width: 100%; max-width: 400px; padding: 0.5rem 0.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text);">
+</form>
 
-  <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;" x-text="users.length + ' users'"></p>
+<p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 1rem;">{{ users|length }} users</p>
 
-  <div class="gear-grid">
-    <template x-for="u in users" :key="u.id">
-      <a :href="'/@' + u.username" class="gear-card" style="color: inherit;">
-        <h3 x-text="'@' + u.username"></h3>
-        <p class="count" x-text="u.bio" x-show="u.bio" style="margin-top: 0.25rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></p>
-        <a :href="u.website" x-text="u.website" x-show="u.website" style="font-size: 0.8rem; margin-top: 0.25rem; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></a>
-      </a>
-    </template>
-    <div class="empty" x-show="users.length === 0" style="grid-column: 1 / -1;">No users found.</div>
-  </div>
+<div class="gear-grid">
+  {% for u in users %}
+  <a href="/@{{ u.username }}" class="gear-card" style="color: inherit;">
+    <h3>@{{ u.username }}</h3>
+    {% if u.bio %}<p class="count" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ u.bio }}</p>{% endif %}
+  </a>
+  {% empty %}
+  <div class="empty" style="grid-column: 1 / -1;">No users found.</div>
+  {% endfor %}
 </div>
 {% endblock %}

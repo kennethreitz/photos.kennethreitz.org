@@ -5,13 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}ExifTree{% endblock %}</title>
   <link rel="stylesheet" href="/static/css/style.css">
-  <script src="https://unpkg.com/htmx.org@2.0.4"></script>
-  <script defer src="https://unpkg.com/alpinejs@3.14.8/dist/cdn.min.js"></script>
-  <script>
-    window.openLightbox = function(images, index) {
-      window.dispatchEvent(new CustomEvent('lightbox', { detail: { images, index } }));
-    };
-  </script>
   {% block head %}{% endblock %}
 </head>
 <body>
@@ -23,37 +16,21 @@
       {% if SINGLE_TENANT %}<a href="/@{{ SINGLE_TENANT }}/collections/">Collections</a>{% else %}<a href="{% url 'users' %}">Users</a>{% endif %}
       <a href="{% url 'search:search' %}">Search</a>
     </div>
-    <div class="nav-auth" x-data="{
-      user: null, open: false,
-      async init() {
-        try {
-          const token = localStorage.getItem('token');
-          if (token) {
-            const res = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
-            if (res.ok) this.user = await res.json();
-            else localStorage.removeItem('token');
-          }
-        } catch(e) {}
-      }
-    }" @click.outside="open = false">
-      <template x-if="user">
-        <div class="nav-user-dropdown">
-          <button class="nav-user-btn" @click="open = !open" x-text="'@' + user.username"></button>
-          <div class="dropdown-menu" x-show="open" x-transition>
-            <a :href="'/@' + user.username">Profile</a>
-            <a href="/dashboard/">Dashboard</a>
-            <a href="/upload/">Upload</a>
-            <hr>
-            <a href="#" @click.prevent="localStorage.removeItem('token'); location.href='/'">Log out</a>
-          </div>
+    <div class="nav-auth" id="nav-auth">
+      <div class="nav-guest" id="nav-guest">
+        <a href="{% url 'login' %}">Log in</a>
+        {% if not SINGLE_TENANT %}<a href="{% url 'register' %}" class="btn btn-primary">Sign up</a>{% endif %}
+      </div>
+      <div class="nav-user-dropdown" id="nav-user" style="display: none;">
+        <button class="nav-user-btn" id="nav-user-btn" onclick="document.getElementById('nav-dropdown').style.display = document.getElementById('nav-dropdown').style.display === 'block' ? 'none' : 'block'"></button>
+        <div class="dropdown-menu" id="nav-dropdown" style="display: none;">
+          <a id="nav-profile-link" href="#">Profile</a>
+          <a href="/dashboard/">Dashboard</a>
+          <a href="/upload/">Upload</a>
+          <hr>
+          <a href="#" onclick="localStorage.removeItem('token'); location.href='/';">Log out</a>
         </div>
-      </template>
-      <template x-if="!user">
-        <div class="nav-guest">
-          <a href="{% url 'login' %}">Log in</a>
-          {% if not SINGLE_TENANT %}<a href="{% url 'register' %}" class="btn btn-primary">Sign up</a>{% endif %}
-        </div>
-      </template>
+      </div>
     </div>
   </nav>
 
@@ -65,62 +42,28 @@
     <p>ExifTree — browse photography through the gear that made it.</p>
   </footer>
 
-  <!-- Lightbox -->
-  <div id="lightbox" x-data="{
-    open: false,
-    images: [],
-    idx: 0,
-    cur: {},
-    show(imgs, i) {
-      this.images = imgs;
-      this.idx = i;
-      this.cur = imgs[i] || {};
-      this.open = true;
-      document.body.style.overflow = 'hidden';
-    },
-    close() { this.open = false; document.body.style.overflow = ''; },
-    prev() { if (this.idx > 0) { this.idx--; this.cur = this.images[this.idx]; } },
-    next() { if (this.idx < this.images.length - 1) { this.idx++; this.cur = this.images[this.idx]; } },
-  }" x-show="open" x-transition.opacity
-     x-init="window._lightbox = $data"
-     @lightbox.window="show($event.detail.images, $event.detail.index)"
-     @keydown.escape.window="close()"
-     @keydown.left.window="if (open) { $event.preventDefault(); prev(); }"
-     @keydown.right.window="if (open) { $event.preventDefault(); next(); }"
-     @click="close()"
-     class="lightbox" x-cloak>
-    <button class="lightbox-close" @click.stop="close()">&times;</button>
-    <button class="lightbox-nav lightbox-prev" @click.stop="prev()" x-show="idx > 0">&lsaquo;</button>
-    <button class="lightbox-nav lightbox-next" @click.stop="next()" x-show="idx < images.length - 1">&rsaquo;</button>
-    <img :src="cur.thumbnail_large || cur.thumbnail_medium || cur.thumbnail_small" :alt="cur.title" @click.stop>
-    <div class="lightbox-info" @click.stop>
-      <div class="lightbox-exif">
-        <div class="exif-item" x-show="cur.camera">
-          <span class="exif-label">Camera</span>
-          <span class="exif-value" x-text="cur.camera"></span>
-        </div>
-        <div class="exif-item" x-show="cur.focal_length">
-          <span class="exif-label">Focal</span>
-          <span class="exif-value" x-text="cur.focal_length + 'mm'"></span>
-        </div>
-        <div class="exif-item" x-show="cur.aperture">
-          <span class="exif-label">Aperture</span>
-          <span class="exif-value" x-text="'f/' + cur.aperture"></span>
-        </div>
-        <div class="exif-item" x-show="cur.iso">
-          <span class="exif-label">ISO</span>
-          <span class="exif-value" x-text="cur.iso"></span>
-        </div>
-      </div>
-      {% if not SINGLE_TENANT %}
-      <div class="lightbox-user">
-        <a :href="'/@' + cur.user" x-text="'@' + cur.user"></a>
-      </div>
-      {% endif %}
-      <a :href="'/images/' + cur.id + '/'" class="lightbox-link">View full details</a>
-    </div>
-  </div>
-
+  <script>
+    // Auth check — minimal JS, no framework
+    (async function() {
+      var token = localStorage.getItem('token');
+      if (!token) return;
+      try {
+        var res = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
+        if (!res.ok) { localStorage.removeItem('token'); return; }
+        var user = await res.json();
+        document.getElementById('nav-guest').style.display = 'none';
+        document.getElementById('nav-user').style.display = '';
+        document.getElementById('nav-user-btn').textContent = '@' + user.username;
+        document.getElementById('nav-profile-link').href = '/@' + user.username;
+      } catch(e) {}
+    })();
+    // Close dropdown on outside click
+    document.addEventListener('click', function(e) {
+      var dd = document.getElementById('nav-dropdown');
+      var btn = document.getElementById('nav-user-btn');
+      if (dd && btn && !btn.contains(e.target) && !dd.contains(e.target)) dd.style.display = 'none';
+    });
+  </script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

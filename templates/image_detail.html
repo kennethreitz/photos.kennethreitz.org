@@ -1,126 +1,102 @@
 {% extends "base.html" %}
-{% block title %}Image — ExifTree{% endblock %}
+{% block title %}{% if image.title %}{{ image.title }} — {% endif %}ExifTree{% endblock %}
 {% block head %}
+{% if image.exif and image.exif.gps_latitude and image.exif.gps_longitude %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% endif %}
 {% endblock %}
 {% block content %}
-<div x-data="{
-  img: null,
-  dlOpen: false,
-  currentUser: null,
-  async init() {
-    const res = await fetch('/api/images/{{ image_id }}');
-    if (res.ok) this.img = await res.json();
-    const token = localStorage.getItem('token');
-    if (token) {
-      const me = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
-      if (me.ok) this.currentUser = await me.json();
-    }
-  },
-  async deleteImage() {
-    if (!confirm('Delete this image permanently?')) return;
-    const token = localStorage.getItem('token');
-    await fetch('/api/images/{{ image_id }}', {
-      method: 'DELETE',
-      headers: { 'Authorization': 'Bearer ' + token },
-    });
-    window.location.href = '/dashboard/';
-  }
-}">
-  <template x-if="img">
+<div>
+  <div style="margin-bottom: 1.5rem;">
+    {% if image.thumbnail_large %}<img src="{{ image.thumbnail_large.url }}" alt="{{ image.title }}" style="max-width: 100%; border-radius: var(--radius);">
+    {% elif image.thumbnail_medium %}<img src="{{ image.thumbnail_medium.url }}" alt="{{ image.title }}" style="max-width: 100%; border-radius: var(--radius);">
+    {% elif image.thumbnail_small %}<img src="{{ image.thumbnail_small.url }}" alt="{{ image.title }}" style="max-width: 100%; border-radius: var(--radius);">{% endif %}
+  </div>
+
+  <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 1rem;">
     <div>
-      <div style="margin-bottom: 1.5rem;">
-        <img :src="img.thumbnail_large || img.thumbnail_medium || img.thumbnail_small"
-             :alt="img.title"
-             style="max-width: 100%; border-radius: var(--radius);">
-      </div>
-
-      <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 1rem;">
-        <div>
-          <p style="color: var(--text-muted);">
-            by <a :href="'/@' + img.user.username" x-text="'@' + img.user.username"></a>
-            · <span x-text="new Date(img.upload_date).toLocaleDateString()"></span>
-            · <span x-text="img.view_count + ' views'"></span>
-          </p>
-          <p x-show="img.description" x-text="img.description" style="margin-top: 0.5rem;"></p>
-        </div>
-
-        <!-- Actions -->
-        <div style="display: flex; gap: 0.5rem;" @click.outside="dlOpen = false">
-          <button class="btn" @click="dlOpen = !dlOpen">Download</button>
-          <div class="dropdown-menu" x-show="dlOpen" x-transition style="right: 0; min-width: 180px;">
-            <a :href="img.thumbnail_small" x-show="img.thumbnail_small" download>
-              <strong>S</strong> <span style="color: var(--text-muted);">Small (300px)</span>
-            </a>
-            <a :href="img.thumbnail_medium" x-show="img.thumbnail_medium" download>
-              <strong>M</strong> <span style="color: var(--text-muted);">Medium (800px)</span>
-            </a>
-            <a :href="img.thumbnail_large" x-show="img.thumbnail_large" download>
-              <strong>L</strong> <span style="color: var(--text-muted);">Large (1600px)</span>
-            </a>
-            <hr>
-            <a :href="img.original" x-show="img.original" download>
-              <strong>O</strong> <span style="color: var(--text-muted);">Original</span>
-            </a>
-          </div>
-          <button x-show="currentUser && currentUser.id === img.user.id"
-                  class="btn" style="color: #f44; border-color: #f44;"
-                  @click="deleteImage()">Delete</button>
-        </div>
-      </div>
-
-      <!-- Map -->
-      <template x-if="img.exif && img.exif.gps_latitude && img.exif.gps_longitude">
-        <div id="map" style="height: 250px; border-radius: var(--radius); margin: 1rem 0;"
-             x-init="$nextTick(() => {
-               const map = L.map('map').setView([img.exif.gps_latitude, img.exif.gps_longitude], 13);
-               L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                 attribution: '&copy; OSM &copy; CARTO',
-                 maxZoom: 19,
-               }).addTo(map);
-               L.marker([img.exif.gps_latitude, img.exif.gps_longitude]).addTo(map);
-             })">
-        </div>
-      </template>
-
-      <template x-if="img.exif">
-        <div class="exif-bar">
-          <div class="exif-item" x-show="img.exif.camera">
-            <span class="exif-label">Camera</span>
-            <a :href="'/cameras/' + img.exif.camera?.slug + '/'"
-               x-text="img.exif.camera?.display_name"></a>
-          </div>
-          <div class="exif-item" x-show="img.exif.lens">
-            <span class="exif-label">Lens</span>
-            <a :href="'/lenses/' + img.exif.lens?.slug + '/'"
-               x-text="img.exif.lens?.display_name"></a>
-          </div>
-          <div class="exif-item" x-show="img.exif.focal_length">
-            <span class="exif-label">Focal Length</span>
-            <span x-text="img.exif.focal_length + 'mm'"></span>
-          </div>
-          <div class="exif-item" x-show="img.exif.aperture">
-            <span class="exif-label">Aperture</span>
-            <span x-text="'f/' + img.exif.aperture"></span>
-          </div>
-          <div class="exif-item" x-show="img.exif.shutter_speed">
-            <span class="exif-label">Shutter Speed</span>
-            <span x-text="img.exif.shutter_speed + 's'"></span>
-          </div>
-          <div class="exif-item" x-show="img.exif.iso">
-            <span class="exif-label">ISO</span>
-            <span x-text="img.exif.iso"></span>
-          </div>
-          <div class="exif-item" x-show="img.exif.date_taken">
-            <span class="exif-label">Date Taken</span>
-            <span x-text="img.exif.date_taken ? new Date(img.exif.date_taken).toLocaleDateString() : ''"></span>
-          </div>
-        </div>
-      </template>
+      <p style="color: var(--text-muted);">
+        by <a href="/@{{ image.user.username }}">@{{ image.user.username }}</a>
+        · {{ image.upload_date|date:"N j, Y" }}
+        · {{ image.view_count }} views
+      </p>
+      {% if image.description %}<p style="margin-top: 0.5rem;">{{ image.description }}</p>{% endif %}
     </div>
-  </template>
 
-  <div class="empty" x-show="!img">Loading...</div>
+    <!-- Download dropdown -->
+    <div style="display: flex; gap: 0.5rem;">
+      <details style="position: relative;">
+        <summary class="btn">Download</summary>
+        <div class="dropdown-menu" style="right: 0; min-width: 180px; margin-top: 0.25rem;">
+          {% if image.thumbnail_small %}<a href="{{ image.thumbnail_small.url }}" download><strong>S</strong> <span style="color: var(--text-muted);">Small (300px)</span></a>{% endif %}
+          {% if image.thumbnail_medium %}<a href="{{ image.thumbnail_medium.url }}" download><strong>M</strong> <span style="color: var(--text-muted);">Medium (800px)</span></a>{% endif %}
+          {% if image.thumbnail_large %}<a href="{{ image.thumbnail_large.url }}" download><strong>L</strong> <span style="color: var(--text-muted);">Large (1600px)</span></a>{% endif %}
+          <hr>
+          {% if image.original %}<a href="{{ image.original.url }}" download><strong>O</strong> <span style="color: var(--text-muted);">Original</span></a>{% endif %}
+        </div>
+      </details>
+    </div>
+  </div>
+
+  {% if image.exif and image.exif.gps_latitude and image.exif.gps_longitude %}
+  <div id="map" style="height: 250px; border-radius: var(--radius); margin: 1rem 0;"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      var map = L.map('map').setView([{{ image.exif.gps_latitude }}, {{ image.exif.gps_longitude }}], 13);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; OSM &copy; CARTO', maxZoom: 19,
+      }).addTo(map);
+      L.marker([{{ image.exif.gps_latitude }}, {{ image.exif.gps_longitude }}]).addTo(map);
+    });
+  </script>
+  {% endif %}
+
+  {% if image.exif %}
+  <div class="exif-bar">
+    {% if image.exif.camera %}
+    <div class="exif-item">
+      <span class="exif-label">Camera</span>
+      <a href="/cameras/{{ image.exif.camera.slug }}/">{{ image.exif.camera.display_name }}</a>
+    </div>
+    {% endif %}
+    {% if image.exif.lens %}
+    <div class="exif-item">
+      <span class="exif-label">Lens</span>
+      <a href="/lenses/{{ image.exif.lens.slug }}/">{{ image.exif.lens.display_name }}</a>
+    </div>
+    {% endif %}
+    {% if image.exif.focal_length %}
+    <div class="exif-item">
+      <span class="exif-label">Focal Length</span>
+      <span>{{ image.exif.focal_length }}mm</span>
+    </div>
+    {% endif %}
+    {% if image.exif.aperture %}
+    <div class="exif-item">
+      <span class="exif-label">Aperture</span>
+      <span>f/{{ image.exif.aperture }}</span>
+    </div>
+    {% endif %}
+    {% if image.exif.shutter_speed %}
+    <div class="exif-item">
+      <span class="exif-label">Shutter Speed</span>
+      <span>{{ image.exif.shutter_speed }}s</span>
+    </div>
+    {% endif %}
+    {% if image.exif.iso %}
+    <div class="exif-item">
+      <span class="exif-label">ISO</span>
+      <span>{{ image.exif.iso }}</span>
+    </div>
+    {% endif %}
+    {% if image.exif.date_taken %}
+    <div class="exif-item">
+      <span class="exif-label">Date Taken</span>
+      <span>{{ image.exif.date_taken|date:"N j, Y" }}</span>
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
 </div>
 {% endblock %}

@@ -1,69 +1,53 @@
 {% extends "base.html" %}
 {% block title %}@{{ profile_user.username }} — ExifTree{% endblock %}
 {% block content %}
-<div x-data="{
-  user: null, images: [], collections: [],
-  async init() {
-    const [uRes, iRes, cRes] = await Promise.all([
-      fetch('/api/users/{{ profile_user.username }}'),
-      fetch('/api/users/{{ profile_user.username }}/images'),
-      fetch('/api/collections/user/{{ profile_user.username }}'),
-    ]);
-    this.user = await uRes.json();
-    this.images = await iRes.json();
-    this.collections = await cRes.json();
-  }
-}">
-  <template x-if="user">
-    <div>
-      <div class="profile-header">
-        <img :src="user.avatar || ''" class="avatar" x-show="user.avatar">
-        <div>
-          <h1 x-text="'@' + user.username"></h1>
-          <p class="bio" x-text="user.bio" x-show="user.bio"></p>
-          <a :href="user.website" x-text="user.website" x-show="user.website" target="_blank"></a>
-        </div>
-      </div>
+<div class="profile-header">
+  {% if profile_user.avatar %}<img src="{{ profile_user.avatar.url }}" class="avatar">{% endif %}
+  <div>
+    <h1>@{{ profile_user.username }}</h1>
+    {% if profile_user.bio %}<p class="bio">{{ profile_user.bio }}</p>{% endif %}
+    {% if profile_user.website %}<a href="{{ profile_user.website }}" target="_blank">{{ profile_user.website }}</a>{% endif %}
+  </div>
+</div>
 
-      <!-- Sets -->
-      <div x-show="collections.length > 0" style="margin-bottom: 2rem;">
-        <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">Collections</h2>
-        <div class="gear-grid">
-          <template x-for="c in collections" :key="c.id">
-            <a :href="'/@{{ profile_user.username }}/collections/' + c.slug + '/'" class="gear-card" style="color: inherit;">
-              <h3 x-text="c.title"></h3>
-              <span class="count" x-text="c.image_count + ' images'"></span>
-            </a>
-          </template>
-        </div>
-      </div>
+{% if collections %}
+<div style="margin-bottom: 2rem;">
+  <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">Collections</h2>
+  <div class="gear-grid">
+    {% for c in collections %}
+    <a href="/@{{ profile_user.username }}/collections/{{ c.slug }}/" class="gear-card" style="color: inherit;">
+      <h3>{{ c.title }}</h3>
+      <span class="count">{{ c.image_count }} images</span>
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
 
-      <!-- Images -->
-      <h2 style="font-size: 1.25rem; margin-bottom: 1rem;">Images</h2>
-      <div class="image-grid">
-        <template x-for="img in images" :key="img.id">
-          <div>
-            <a :href="'/images/' + img.id + '/'" class="image-card">
-              <img :src="img.thumbnail_medium || img.thumbnail_small" :alt="img.title">
-              <div class="overlay">
-                <div class="exif-row">
-                  <div class="exif-left">
-                    <span x-text="img.camera" x-show="img.camera"></span>
-                  </div>
-                  <div class="exif-right">
-                    <span x-show="img.focal_length" x-text="img.focal_length + 'mm'"></span>
-                    <span x-show="img.aperture" x-text="'f/' + img.aperture"></span>
-                    <span x-show="img.iso" x-text="'ISO ' + img.iso"></span>
-                  </div>
-                </div>
-              </div>
-            </a>
-            {% if not SINGLE_TENANT %}<a :href="'/@' + img.user" class="image-card-user" x-text="'@' + img.user"></a>{% endif %}
+<h2 style="font-size: 1.25rem; margin-bottom: 1rem;">Images</h2>
+<div class="image-grid">
+  {% for img in images %}
+  <div>
+    <a href="/images/{{ img.id }}/" class="image-card">
+      {% if img.thumbnail_medium %}<img src="{{ img.thumbnail_medium.url }}" alt="{{ img.title }}">
+      {% elif img.thumbnail_small %}<img src="{{ img.thumbnail_small.url }}" alt="{{ img.title }}">{% endif %}
+      <div class="overlay">
+        <div class="exif-row">
+          <div class="exif-left">
+            {% if img.exif and img.exif.camera %}<span>{{ img.exif.camera.display_name }}</span>{% endif %}
           </div>
-        </template>
-        <div class="empty" x-show="images.length === 0">No images yet.</div>
+          <div class="exif-right">
+            {% if img.exif.focal_length %}<span>{{ img.exif.focal_length }}mm</span>{% endif %}
+            {% if img.exif.aperture %}<span>f/{{ img.exif.aperture }}</span>{% endif %}
+            {% if img.exif.iso %}<span>ISO {{ img.exif.iso }}</span>{% endif %}
+          </div>
+        </div>
       </div>
-    </div>
-  </template>
+    </a>
+    {% if not SINGLE_TENANT %}<a href="/@{{ img.user.username }}" class="image-card-user">@{{ img.user.username }}</a>{% endif %}
+  </div>
+  {% empty %}
+  <div class="empty">No images yet.</div>
+  {% endfor %}
 </div>
 {% endblock %}
