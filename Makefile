@@ -1,5 +1,8 @@
 .PHONY: sync run migrate makemigrations bolt db
 
+include .env
+export
+
 sync:
 	uv sync
 
