@@ -149,6 +149,8 @@ a:hover { color: var(--accent-hover); }
   font-size: 0.75rem;
   line-height: 1.4;
 }
+.image-card .overlay a.overlay-link { color: rgba(255,255,255,0.85); }
+.image-card .overlay a.overlay-link:hover { color: var(--accent); }
 .image-card-user {
   display: block;
   padding: 0.35rem 0;
