@@ -65,11 +65,17 @@
     open: false,
     images: [],
     idx: 0,
-    get img() { return this.images[this.idx] || {}; },
-    show(imgs, i) { this.images = imgs; this.idx = i; this.open = true; document.body.style.overflow = 'hidden'; },
+    cur: {},
+    show(imgs, i) {
+      this.images = imgs;
+      this.idx = i;
+      this.cur = imgs[i] || {};
+      this.open = true;
+      document.body.style.overflow = 'hidden';
+    },
     close() { this.open = false; document.body.style.overflow = ''; },
-    prev() { if (this.idx > 0) this.idx--; },
-    next() { if (this.idx < this.images.length - 1) this.idx++; },
+    prev() { if (this.idx > 0) { this.idx--; this.cur = this.images[this.idx]; } },
+    next() { if (this.idx < this.images.length - 1) { this.idx++; this.cur = this.images[this.idx]; } },
   }" x-show="open" x-transition.opacity
      @lightbox.window="show($event.detail.images, $event.detail.index)"
      @keydown.escape.window="close()"
@@ -77,33 +83,35 @@
      @keydown.right.window="if (open) { $event.preventDefault(); next(); }"
      @click="close()"
      class="lightbox" x-cloak>
-    <button class="lightbox-close" @click="close()">&times;</button>
+    <button class="lightbox-close" @click.stop="close()">&times;</button>
     <button class="lightbox-nav lightbox-prev" @click.stop="prev()" x-show="idx > 0">&lsaquo;</button>
     <button class="lightbox-nav lightbox-next" @click.stop="next()" x-show="idx < images.length - 1">&rsaquo;</button>
-    <img :src="img.thumbnail_large || img.thumbnail_medium || img.thumbnail_small" :alt="img.title" @click.stop>
+    <img :src="cur.thumbnail_large || cur.thumbnail_medium || cur.thumbnail_small" :alt="cur.title" @click.stop>
     <div class="lightbox-info" @click.stop>
       <div class="lightbox-exif">
-        <div class="exif-item" x-show="img.camera">
+        <div class="exif-item" x-show="cur.camera">
           <span class="exif-label">Camera</span>
-          <span class="exif-value" x-text="img.camera"></span>
+          <span class="exif-value" x-text="cur.camera"></span>
         </div>
-        <div class="exif-item" x-show="img.focal_length">
+        <div class="exif-item" x-show="cur.focal_length">
           <span class="exif-label">Focal</span>
-          <span class="exif-value" x-text="img.focal_length + 'mm'"></span>
+          <span class="exif-value" x-text="cur.focal_length + 'mm'"></span>
         </div>
-        <div class="exif-item" x-show="img.aperture">
+        <div class="exif-item" x-show="cur.aperture">
           <span class="exif-label">Aperture</span>
-          <span class="exif-value" x-text="'f/' + img.aperture"></span>
+          <span class="exif-value" x-text="'f/' + cur.aperture"></span>
         </div>
-        <div class="exif-item" x-show="img.iso">
+        <div class="exif-item" x-show="cur.iso">
           <span class="exif-label">ISO</span>
-          <span class="exif-value" x-text="img.iso"></span>
+          <span class="exif-value" x-text="cur.iso"></span>
         </div>
       </div>
+      {% if not SINGLE_TENANT %}
       <div class="lightbox-user">
-        <a :href="'/@' + img.user" x-text="'@' + img.user"></a>
+        <a :href="'/@' + cur.user" x-text="'@' + cur.user"></a>
       </div>
-      <a :href="'/images/' + img.id + '/'" class="lightbox-link">View full details</a>
+      {% endif %}
+      <a :href="'/images/' + cur.id + '/'" class="lightbox-link">View full details</a>
     </div>
   </div>
 
