@@ -458,9 +458,7 @@ async def upload_image(
     content_hash = hashlib.sha256(contents).hexdigest()
 
     # Check for duplicate
-    existing = await Image.objects.filter(
-        user=request.user, content_hash=content_hash
-    ).afirst()
+    existing = await Image.objects.filter(content_hash=content_hash).afirst()
     if existing:
         return Response({"detail": "Duplicate image", "id": str(existing.id)}, status_code=409)
 
