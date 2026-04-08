@@ -15,7 +15,7 @@
     <div class="nav-links">
       <a href="{% url 'tree:camera-list' %}">Cameras</a>
       <a href="{% url 'tree:lens-list' %}">Lenses</a>
-      <a href="{% url 'users' %}">Users</a>
+      {% if not SINGLE_TENANT %}<a href="{% url 'users' %}">Users</a>{% endif %}
       <a href="{% url 'search:search' %}">Search</a>
     </div>
     <div class="nav-auth" x-data="{
@@ -46,7 +46,7 @@
       <template x-if="!user">
         <div class="nav-guest">
           <a href="{% url 'login' %}">Log in</a>
-          <a href="{% url 'register' %}" class="btn btn-primary">Sign up</a>
+          {% if not SINGLE_TENANT %}<a href="{% url 'register' %}" class="btn btn-primary">Sign up</a>{% endif %}
         </div>
       </template>
     </div>

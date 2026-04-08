@@ -30,7 +30,7 @@
             </div>
           </div>
         </div>
-        <a :href="'/@' + img.user" class="image-card-user" x-text="'@' + img.user"></a>
+        {% if not SINGLE_TENANT %}<a :href="'/@' + img.user" class="image-card-user" x-text="'@' + img.user"></a>{% endif %}
       </div>
     </template>
   </div>

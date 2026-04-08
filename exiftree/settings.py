@@ -30,6 +30,9 @@ DEBUG = os.environ.get("DEBUG", "1") == "1"
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
 CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "https://exiftree.fly.dev,https://exiftree.org").split(",")
 
+# Single-tenant mode — set to a username to disable multi-user UI
+SINGLE_TENANT = os.environ.get("SINGLE_TENANT", "")
+
 
 # Application definition
 
@@ -73,6 +76,7 @@ TEMPLATES = [
             "context_processors": [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
+                "core.context_processors.site_context",
                 "django.contrib.messages.context_processors.messages",
             ],
         },

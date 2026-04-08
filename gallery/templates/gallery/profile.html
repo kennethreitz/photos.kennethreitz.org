@@ -58,7 +58,7 @@
                 </div>
               </div>
             </a>
-            <a :href="'/@' + img.user" class="image-card-user" x-text="'@' + img.user"></a>
+            {% if not SINGLE_TENANT %}<a :href="'/@' + img.user" class="image-card-user" x-text="'@' + img.user"></a>{% endif %}
           </div>
         </template>
         <div class="empty" x-show="images.length === 0">No images yet.</div>
