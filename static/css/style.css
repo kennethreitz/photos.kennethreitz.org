@@ -130,14 +130,14 @@ a:hover { color: var(--accent-hover); }
   cursor: pointer;
   transition: transform 0.15s;
 }
-.image-card:hover, .image-card-selected { transform: scale(1.02); }
-.image-card-selected { outline: 2px solid var(--accent); outline-offset: 2px; }
 .image-card img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
+.image-card:hover, .image-card-selected { transform: scale(1.02); }
+.image-card-selected { outline: 2px solid var(--accent); outline-offset: 2px; }
 .image-card .overlay {
   position: absolute;
   bottom: 0;
