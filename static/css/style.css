@@ -269,11 +269,16 @@ a:hover { color: var(--accent-hover); }
 .upload-zone {
   border: 2px dashed var(--border);
   border-radius: var(--radius);
-  padding: 3rem;
+  padding: 6rem 3rem;
   text-align: center;
   cursor: pointer;
   transition: border-color 0.15s;
-  margin-bottom: 1rem;
+  margin-bottom: 2rem;
+  min-height: 40vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 .upload-page-dragover .upload-zone { border-color: var(--accent); background: rgba(74, 158, 255, 0.08); }
 .upload-zone:hover { border-color: var(--accent); }
