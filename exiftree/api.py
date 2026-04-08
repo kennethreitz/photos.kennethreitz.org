@@ -523,7 +523,12 @@ async def upload_image(
             content_hash=content_hash,
             is_processing=True,
         )
-        process_image_task.apply_async(args=[str(img.id)], ignore_result=True)
+        try:
+            process_image_task.apply_async(args=[str(img.id)], ignore_result=True)
+        except Exception:
+            # No Redis/Celery — process synchronously
+            from ingest.pipeline import process_image
+            process_image(img)
         return img
 
     img = await _create_and_dispatch()
