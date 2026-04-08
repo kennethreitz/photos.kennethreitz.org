@@ -19,13 +19,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
+import os
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-x8w4k=pjv*+&gl02p#ucsdh7*5)k&m7av=ehc8_6v756pg@f=j"
+SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-x8w4k=pjv*+&gl02p#ucsdh7*5)k&m7av=ehc8_6v756pg@f=j")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "1") == "1"
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "https://exiftree.fly.dev,https://exiftree.org").split(",")
 
 
 # Application definition
@@ -136,7 +139,6 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 # Object storage (S3-compatible — Tigris, R2, etc.)
 # Set these via environment variables in production.
-import os
 
 if os.environ.get("AWS_STORAGE_BUCKET_NAME") or os.environ.get("BUCKET_NAME"):
     STORAGES = {
