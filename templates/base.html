@@ -20,7 +20,7 @@
     <div class="nav-links">
       <a href="{% url 'tree:camera-list' %}">Cameras</a>
       <a href="{% url 'tree:lens-list' %}">Lenses</a>
-      {% if not SINGLE_TENANT %}<a href="{% url 'users' %}">Users</a>{% endif %}
+      {% if SINGLE_TENANT %}<a href="/@{{ SINGLE_TENANT }}/collections/">Collections</a>{% else %}<a href="{% url 'users' %}">Users</a>{% endif %}
       <a href="{% url 'search:search' %}">Search</a>
     </div>
     <div class="nav-auth" x-data="{
