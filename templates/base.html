@@ -60,6 +60,53 @@
     <p>ExifTree — browse photography through the gear that made it.</p>
   </footer>
 
+  <!-- Lightbox -->
+  <div id="lightbox" x-data="{
+    open: false,
+    images: [],
+    idx: 0,
+    get img() { return this.images[this.idx] || {}; },
+    show(imgs, i) { this.images = imgs; this.idx = i; this.open = true; document.body.style.overflow = 'hidden'; },
+    close() { this.open = false; document.body.style.overflow = ''; },
+    prev() { if (this.idx > 0) this.idx--; },
+    next() { if (this.idx < this.images.length - 1) this.idx++; },
+  }" x-show="open" x-transition.opacity
+     @lightbox.window="show($event.detail.images, $event.detail.index)"
+     @keydown.escape.window="close()"
+     @keydown.left.window="if (open) { $event.preventDefault(); prev(); }"
+     @keydown.right.window="if (open) { $event.preventDefault(); next(); }"
+     @click="close()"
+     class="lightbox" style="display: none;">
+    <button class="lightbox-close" @click="close()">&times;</button>
+    <button class="lightbox-nav lightbox-prev" @click.stop="prev()" x-show="idx > 0">&lsaquo;</button>
+    <button class="lightbox-nav lightbox-next" @click.stop="next()" x-show="idx < images.length - 1">&rsaquo;</button>
+    <img :src="img.thumbnail_large || img.thumbnail_medium || img.thumbnail_small" :alt="img.title" @click.stop>
+    <div class="lightbox-info" @click.stop>
+      <div class="lightbox-exif">
+        <div class="exif-item" x-show="img.camera">
+          <span class="exif-label">Camera</span>
+          <span class="exif-value" x-text="img.camera"></span>
+        </div>
+        <div class="exif-item" x-show="img.focal_length">
+          <span class="exif-label">Focal</span>
+          <span class="exif-value" x-text="img.focal_length + 'mm'"></span>
+        </div>
+        <div class="exif-item" x-show="img.aperture">
+          <span class="exif-label">Aperture</span>
+          <span class="exif-value" x-text="'f/' + img.aperture"></span>
+        </div>
+        <div class="exif-item" x-show="img.iso">
+          <span class="exif-label">ISO</span>
+          <span class="exif-value" x-text="img.iso"></span>
+        </div>
+      </div>
+      <div class="lightbox-user">
+        <a :href="'/@' + img.user" x-text="'@' + img.user"></a>
+      </div>
+      <a :href="'/images/' + img.id + '/'" class="lightbox-link">View full details</a>
+    </div>
+  </div>
+
   {% block scripts %}{% endblock %}
 </body>
 </html>

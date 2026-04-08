@@ -14,15 +14,14 @@
   }
 }">
   <div class="image-grid" style="grid-template-columns: repeat(4, 1fr);">
-    <template x-for="img in images" :key="img.id">
+    <template x-for="(img, i) in images" :key="img.id">
       <div>
-        <a :href="'/images/' + img.id + '/'" class="image-card">
+        <div class="image-card" style="cursor: pointer;"
+             @click="$dispatch('lightbox', { images, index: i })">
           <img :src="img.thumbnail_medium || img.thumbnail_small" :alt="img.title">
           <div class="overlay">
             <div class="exif-row">
-              <div class="exif-left">
-                <span x-text="img.camera" x-show="img.camera"></span>
-              </div>
+              <div class="exif-left"><span x-text="img.camera" x-show="img.camera"></span></div>
               <div class="exif-right">
                 <span x-show="img.focal_length" x-text="img.focal_length + 'mm'"></span>
                 <span x-show="img.aperture" x-text="'f/' + img.aperture"></span>
@@ -30,7 +29,7 @@
               </div>
             </div>
           </div>
-        </a>
+        </div>
         <a :href="'/@' + img.user" class="image-card-user" x-text="'@' + img.user"></a>
       </div>
     </template>

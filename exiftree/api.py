@@ -145,6 +145,7 @@ class ImageListSchema(msgspec.Struct):
     upload_date: str
     thumbnail_small: str = ''
     thumbnail_medium: str = ''
+    thumbnail_large: str = ''
     camera: str = ''
     lens: str = ''
     focal_length: float | None = None
@@ -276,6 +277,7 @@ def _image_list_schema(img: Image) -> ImageListSchema:
         user=img.user.username, upload_date=img.upload_date.isoformat(),
         thumbnail_small=img.thumbnail_small.url if img.thumbnail_small else '',
         thumbnail_medium=img.thumbnail_medium.url if img.thumbnail_medium else '',
+        thumbnail_large=img.thumbnail_large.url if img.thumbnail_large else '',
         camera=camera, lens=lens, focal_length=focal_length,
         aperture=aperture, iso=iso,
     )
