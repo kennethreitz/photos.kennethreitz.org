@@ -58,7 +58,8 @@
           </div>
           <div class="exif-item" x-show="img.exif.lens">
             <span class="exif-label">Lens</span>
-            <span x-text="img.exif.lens?.display_name"></span>
+            <a :href="'/lenses/' + img.exif.lens?.manufacturer?.toLowerCase().replace(/\s+/g, '-') + '/' + img.exif.lens?.slug + '/'"
+               x-text="img.exif.lens?.display_name"></a>
           </div>
           <div class="exif-item" x-show="img.exif.focal_length">
             <span class="exif-label">Focal Length</span>
