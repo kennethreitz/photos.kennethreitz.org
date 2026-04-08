@@ -300,7 +300,7 @@ search_router = Router(prefix="/api/search", tags=["search"])
 # ---------------------------------------------------------------------------
 
 @auth_router.post("/register")
-async def register(data: RegisterInput) -> TokenSchema:
+async def register(data: RegisterInput):
     if await User.objects.filter(username=data.username).aexists():
         return Response({"detail": "Username taken"}, status_code=409)
     if await User.objects.filter(email=data.email).aexists():
@@ -316,7 +316,7 @@ async def register(data: RegisterInput) -> TokenSchema:
 
 
 @auth_router.post("/login")
-async def login(data: LoginInput) -> TokenSchema:
+async def login(data: LoginInput):
     user = await User.objects.filter(username=data.username).afirst()
     if not user or not user.check_password(data.password):
         return Response({"detail": "Invalid credentials"}, status_code=401)
@@ -438,7 +438,7 @@ async def upload_image(
     image: Annotated[UploadFile, File(max_size=50_000_000)],
     title: str = '',
     description: str = '',
-) -> ImageSchema:
+):
     from django.conf import settings
     from django.core.files.base import ContentFile
     from asgiref.sync import sync_to_async
@@ -481,7 +481,7 @@ async def upload_image(
     auth=[JWTAuthentication()],
     guards=[IsAuthenticated()],
 )
-async def update_image(request: Request, image_id: str, data: ImageUpdateInput) -> ImageSchema:
+async def update_image(request: Request, image_id: str, data: ImageUpdateInput):
     img = await Image.objects.select_related('user').aget(id=image_id)
     if str(img.user_id) != str(request.user.id):
         return Response({"detail": "Not your image"}, status_code=403)
@@ -580,7 +580,7 @@ async def get_collection(collection_id: str) -> CollectionDetailSchema:
     auth=[JWTAuthentication()],
     guards=[IsAuthenticated()],
 )
-async def create_collection(request: Request, data: CollectionCreateInput) -> CollectionSchema:
+async def create_collection(request: Request, data: CollectionCreateInput):
     c = await Collection.objects.acreate(
         user=request.user,
         title=data.title,
@@ -604,7 +604,7 @@ async def create_collection(request: Request, data: CollectionCreateInput) -> Co
 )
 async def update_collection(
     request: Request, collection_id: str, data: CollectionUpdateInput,
-) -> CollectionSchema:
+):
     c = await Collection.objects.aget(id=collection_id)
     if str(c.user_id) != str(request.user.id):
         return Response({"detail": "Not your collection"}, status_code=403)
