@@ -121,6 +121,7 @@ a:hover { color: var(--accent-hover); }
 }
 
 .image-card {
+  display: block;
   position: relative;
   aspect-ratio: 1;
   border-radius: var(--radius);
