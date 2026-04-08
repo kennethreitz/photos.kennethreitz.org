@@ -7,6 +7,8 @@ OpenAPI docs available at /api/docs/
 
 from __future__ import annotations
 
+from typing import Annotated
+
 import msgspec
 from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
@@ -22,6 +24,7 @@ from django_bolt import (
     UploadFile,
     create_jwt_for_user,
 )
+from django_bolt.params import File
 
 from core.models import Camera, ExifData, Image, Lens, User
 from gallery.models import Collection, CollectionImage
@@ -50,8 +53,7 @@ class LoginInput(msgspec.Struct):
 
 
 class TokenSchema(msgspec.Struct):
-    access: str
-    refresh: str
+    token: str
 
 
 class UserSchema(msgspec.Struct):
@@ -300,27 +302,27 @@ search_router = Router(prefix="/api/search", tags=["search"])
 @auth_router.post("/register")
 async def register(data: RegisterInput) -> TokenSchema:
     if await User.objects.filter(username=data.username).aexists():
-        return Response({"detail": "Username taken"}, status=409)
+        return Response({"detail": "Username taken"}, status_code=409)
     if await User.objects.filter(email=data.email).aexists():
-        return Response({"detail": "Email already registered"}, status=409)
+        return Response({"detail": "Email already registered"}, status_code=409)
 
     user = await User.objects.acreate(
         username=data.username,
         email=data.email,
         password=make_password(data.password),
     )
-    tokens = create_jwt_for_user(user)
-    return TokenSchema(access=tokens['access'], refresh=tokens['refresh'])
+    token = create_jwt_for_user(user)
+    return TokenSchema(token=token)
 
 
 @auth_router.post("/login")
 async def login(data: LoginInput) -> TokenSchema:
     user = await User.objects.filter(username=data.username).afirst()
     if not user or not user.check_password(data.password):
-        return Response({"detail": "Invalid credentials"}, status=401)
+        return Response({"detail": "Invalid credentials"}, status_code=401)
 
-    tokens = create_jwt_for_user(user)
-    return TokenSchema(access=tokens['access'], refresh=tokens['refresh'])
+    token = create_jwt_for_user(user)
+    return TokenSchema(token=token)
 
 
 @auth_router.get("/me", auth=[JWTAuthentication()], guards=[IsAuthenticated()])
@@ -433,7 +435,7 @@ async def get_image(image_id: str) -> ImageSchema:
 )
 async def upload_image(
     request: Request,
-    image: UploadFile,
+    image: Annotated[UploadFile, File(max_size=50_000_000)],
     title: str = '',
     description: str = '',
 ) -> ImageSchema:
@@ -442,7 +444,7 @@ async def upload_image(
 
     contents = await image.read()
     if len(contents) > settings.MAX_UPLOAD_SIZE:
-        return Response({"detail": "File too large"}, status=400)
+        return Response({"detail": "File too large"}, status_code=400)
 
     slug = slugify(title) if title else slugify(image.filename.rsplit('.', 1)[0])
 
@@ -455,11 +457,12 @@ async def upload_image(
         is_processing=True,
     )
 
-    process_image_task.delay(str(img.id))
+    from asgiref.sync import sync_to_async
+    await sync_to_async(process_image_task.delay)(str(img.id))
 
     return Response(
         _image_schema(img),
-        status=201,
+        status_code=201,
     )
 
 
@@ -471,7 +474,7 @@ async def upload_image(
 async def update_image(request: Request, image_id: str, data: ImageUpdateInput) -> ImageSchema:
     img = await Image.objects.select_related('user').aget(id=image_id)
     if str(img.user_id) != str(request.user.id):
-        return Response({"detail": "Not your image"}, status=403)
+        return Response({"detail": "Not your image"}, status_code=403)
 
     update_fields = ['updated_at']
     if data.title is not None:
@@ -497,9 +500,9 @@ async def update_image(request: Request, image_id: str, data: ImageUpdateInput) 
 async def delete_image(request: Request, image_id: str):
     img = await Image.objects.aget(id=image_id)
     if str(img.user_id) != str(request.user.id):
-        return Response({"detail": "Not your image"}, status=403)
+        return Response({"detail": "Not your image"}, status_code=403)
     await img.adelete()
-    return Response(status=204)
+    return Response({}, status_code=204)
 
 
 # ---------------------------------------------------------------------------
@@ -594,7 +597,7 @@ async def update_collection(
 ) -> CollectionSchema:
     c = await Collection.objects.aget(id=collection_id)
     if str(c.user_id) != str(request.user.id):
-        return Response({"detail": "Not your collection"}, status=403)
+        return Response({"detail": "Not your collection"}, status_code=403)
 
     update_fields = ['updated_at']
     if data.title is not None:
@@ -624,9 +627,9 @@ async def update_collection(
 async def delete_collection(request: Request, collection_id: str):
     c = await Collection.objects.aget(id=collection_id)
     if str(c.user_id) != str(request.user.id):
-        return Response({"detail": "Not your collection"}, status=403)
+        return Response({"detail": "Not your collection"}, status_code=403)
     await c.adelete()
-    return Response(status=204)
+    return Response({}, status_code=204)
 
 
 @collections_router.post(
@@ -637,16 +640,16 @@ async def delete_collection(request: Request, collection_id: str):
 async def add_image_to_collection(request: Request, collection_id: str, image_id: str):
     c = await Collection.objects.aget(id=collection_id)
     if str(c.user_id) != str(request.user.id):
-        return Response({"detail": "Not your collection"}, status=403)
+        return Response({"detail": "Not your collection"}, status_code=403)
 
     if await CollectionImage.objects.filter(collection=c, image_id=image_id).aexists():
-        return Response({"detail": "Image already in collection"}, status=409)
+        return Response({"detail": "Image already in collection"}, status_code=409)
 
     count = await CollectionImage.objects.filter(collection=c).acount()
     await CollectionImage.objects.acreate(
         collection=c, image_id=image_id, sort_order=count,
     )
-    return Response(status=201)
+    return Response({}, status_code=201)
 
 
 @collections_router.delete(
@@ -657,14 +660,14 @@ async def add_image_to_collection(request: Request, collection_id: str, image_id
 async def remove_image_from_collection(request: Request, collection_id: str, image_id: str):
     c = await Collection.objects.aget(id=collection_id)
     if str(c.user_id) != str(request.user.id):
-        return Response({"detail": "Not your collection"}, status=403)
+        return Response({"detail": "Not your collection"}, status_code=403)
 
     deleted, _ = await CollectionImage.objects.filter(
         collection=c, image_id=image_id,
     ).adelete()
     if not deleted:
-        return Response({"detail": "Image not in collection"}, status=404)
-    return Response(status=204)
+        return Response({"detail": "Image not in collection"}, status_code=404)
+    return Response({}, status_code=204)
 
 
 # ---------------------------------------------------------------------------
@@ -727,15 +730,15 @@ async def group_images(slug: str) -> list[ImageListSchema]:
 async def join_group(request: Request, slug: str):
     g = await Group.objects.aget(slug=slug)
     if g.visibility == Group.Visibility.PRIVATE:
-        return Response({"detail": "Private group"}, status=403)
+        return Response({"detail": "Private group"}, status_code=403)
 
     if await GroupMembership.objects.filter(user=request.user, group=g).aexists():
-        return Response({"detail": "Already a member"}, status=409)
+        return Response({"detail": "Already a member"}, status_code=409)
 
     await GroupMembership.objects.acreate(
         user=request.user, group=g, role=GroupMembership.Role.MEMBER,
     )
-    return Response(status=201)
+    return Response({}, status_code=201)
 
 
 @groups_router.post(
@@ -748,8 +751,8 @@ async def leave_group(request: Request, slug: str):
         user=request.user, group__slug=slug,
     ).adelete()
     if not deleted:
-        return Response({"detail": "Not a member"}, status=404)
-    return Response(status=204)
+        return Response({"detail": "Not a member"}, status_code=404)
+    return Response({}, status_code=204)
 
 
 @groups_router.post(
@@ -762,18 +765,18 @@ async def submit_image_to_group(request: Request, slug: str, image_id: str):
 
     # Must be a member
     if not await GroupMembership.objects.filter(user=request.user, group=g).aexists():
-        return Response({"detail": "Not a member"}, status=403)
+        return Response({"detail": "Not a member"}, status_code=403)
 
     # Must own the image
     img = await Image.objects.aget(id=image_id)
     if str(img.user_id) != str(request.user.id):
-        return Response({"detail": "Not your image"}, status=403)
+        return Response({"detail": "Not your image"}, status_code=403)
 
     if await GroupImage.objects.filter(image=img, group=g).aexists():
-        return Response({"detail": "Image already in group"}, status=409)
+        return Response({"detail": "Image already in group"}, status_code=409)
 
     await GroupImage.objects.acreate(image=img, group=g)
-    return Response(status=201)
+    return Response({}, status_code=201)
 
 
 # ---------------------------------------------------------------------------

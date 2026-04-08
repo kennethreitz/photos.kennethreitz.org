@@ -10,12 +10,9 @@ services:
       - path: .env
         required: false
     environment:
-      - DATABASE_URL=postgres://exiftree:exiftree@db:5432/exiftree
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
 
@@ -29,28 +26,11 @@ services:
       - path: .env
         required: false
     environment:
-      - DATABASE_URL=postgres://exiftree:exiftree@db:5432/exiftree
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     depends_on:
-      db:
-        condition: service_healthy
       redis:
         condition: service_healthy
-
-  db:
-    image: postgres:17
-    environment:
-      POSTGRES_USER: exiftree
-      POSTGRES_PASSWORD: exiftree
-      POSTGRES_DB: exiftree
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U exiftree"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -59,6 +39,3 @@ services:
       interval: 5s
       timeout: 3s
       retries: 5
-
-volumes:
-  pgdata:

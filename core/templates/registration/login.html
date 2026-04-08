@@ -12,7 +12,7 @@
     });
     if (res.ok) {
       const data = await res.json();
-      localStorage.setItem('token', data.access);
+      localStorage.setItem('token', data.token);
       window.location.href = '/';
     } else {
       const data = await res.json();
