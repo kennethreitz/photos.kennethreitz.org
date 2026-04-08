@@ -15,7 +15,11 @@ def home(request):
     if year:
         qs = qs.filter(exif__date_taken__year=year)
 
-    images = qs.order_by('?')[:48]
+    import random
+    ids = list(qs.values_list('id', flat=True))
+    if len(ids) > 48:
+        ids = random.sample(ids, 48)
+    images = qs.filter(id__in=ids)
 
     years = (
         ExifData.objects.filter(date_taken__isnull=False)

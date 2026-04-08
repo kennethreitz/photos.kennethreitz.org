@@ -24,22 +24,18 @@ def process_image_task(self, image_id: str) -> None:
     try:
         process_image(image)
 
-        # Post-processing perceptual dedup
+        # Post-processing perceptual dedup — batch load, compare in memory
         if image.perceptual_hash and image.perceptual_hash != '8000000000000000':
             upload_hash = imagehash.hex_to_hash(image.perceptual_hash)
-            for candidate in (
+            candidates = list(
                 Image.objects.exclude(id=image.id)
                 .exclude(perceptual_hash='')
                 .exclude(perceptual_hash='8000000000000000')
-                .only('id', 'perceptual_hash', 'upload_date')
-                .order_by('upload_date')
-            ):
-                if imagehash.hex_to_hash(candidate.perceptual_hash) - upload_hash <= PHASH_THRESHOLD:
-                    logger.info(
-                        "Image %s is a visual duplicate of %s (distance=%d), deleting",
-                        image_id, candidate.id,
-                        imagehash.hex_to_hash(candidate.perceptual_hash) - upload_hash,
-                    )
+                .values_list('id', 'perceptual_hash')
+            )
+            for cid, chash in candidates:
+                if imagehash.hex_to_hash(chash) - upload_hash <= PHASH_THRESHOLD:
+                    logger.info("Image %s is visual dupe of %s, deleting", image_id, cid)
                     image.delete()
                     return
 
