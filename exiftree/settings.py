@@ -28,7 +28,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-x8w4k=pjv*+&gl02p#ucs
 DEBUG = os.environ.get("DEBUG", "1") == "1"
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "https://exiftree.fly.dev,https://exiftree.org").split(",")
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "https://exiftree.fly.dev,https://exiftree.org,https://photos.kennethreitz.org").split(",")
 
 
 # Application definition
