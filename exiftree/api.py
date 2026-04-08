@@ -37,7 +37,7 @@ from ingest.tasks import process_image_task
 RATE_READ = 100
 RATE_WRITE = 20
 RATE_AUTH = 10
-RATE_UPLOAD = 5
+RATE_UPLOAD = 30
 RATE_SEARCH = 50
 
 # ---------------------------------------------------------------------------
