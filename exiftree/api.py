@@ -441,6 +441,7 @@ async def upload_image(
 ) -> ImageSchema:
     from django.conf import settings
     from django.core.files.base import ContentFile
+    from asgiref.sync import sync_to_async
 
     contents = await image.read()
     if len(contents) > settings.MAX_UPLOAD_SIZE:
@@ -448,20 +449,29 @@ async def upload_image(
 
     slug = slugify(title) if title else slugify(image.filename.rsplit('.', 1)[0])
 
-    img = await Image.objects.acreate(
-        user=request.user,
-        title=title,
-        description=description,
-        slug=slug,
-        original=ContentFile(contents, name=image.filename),
-        is_processing=True,
-    )
+    @sync_to_async
+    def _create_and_dispatch():
+        img = Image.objects.create(
+            user=request.user,
+            title=title,
+            description=description,
+            slug=slug,
+            original=ContentFile(contents, name=image.filename),
+            is_processing=True,
+        )
+        process_image_task.apply_async(args=[str(img.id)], ignore_result=True)
+        return img
 
-    from asgiref.sync import sync_to_async
-    await sync_to_async(process_image_task.delay)(str(img.id))
+    img = await _create_and_dispatch()
 
+    # Image was just created — no exif yet, build a simple response
     return Response(
-        _image_schema(img),
+        ImageSchema(
+            id=str(img.id), title=img.title, slug=img.slug,
+            description=img.description, user=_user_schema(request.user),
+            visibility=img.visibility, upload_date=img.upload_date.isoformat(),
+            view_count=0, is_processing=True,
+        ),
         status_code=201,
     )
 
