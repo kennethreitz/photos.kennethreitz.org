@@ -1,35 +1,46 @@
 {% extends "base.html" %}
 {% block title %}Log in — ExifTree{% endblock %}
 {% block content %}
-<div class="auth-form" x-data="{ username: '', password: '', error: '' }">
+<div class="auth-form">
   <h1>Log in</h1>
-  <form @submit.prevent="
-    error = '';
-    const res = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      localStorage.setItem('token', data.token);
-      window.location.href = '/';
-    } else {
-      const data = await res.json();
-      error = data.detail || 'Login failed';
-    }
-  ">
+  <form id="login-form">
     <div class="field">
       <label>Username</label>
-      <input type="text" x-model="username" required autofocus>
+      <input type="text" id="username" required autofocus>
     </div>
     <div class="field">
       <label>Password</label>
-      <input type="password" x-model="password" required>
+      <input type="password" id="password" required>
     </div>
-    <p x-show="error" x-text="error" style="color: #f44; font-size: 0.9rem; margin-bottom: 0.5rem;"></p>
+    <p id="error" style="color: #f44; font-size: 0.9rem; margin-bottom: 0.5rem; display: none;"></p>
     <button type="submit" class="btn btn-primary">Log in</button>
   </form>
   <p class="alt">Don't have an account? <a href="{% url 'register' %}">Sign up</a></p>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('login-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  var err = document.getElementById('error');
+  err.style.display = 'none';
+  var res = await fetch('/api/auth/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      username: document.getElementById('username').value,
+      password: document.getElementById('password').value,
+    }),
+  });
+  if (res.ok) {
+    var data = await res.json();
+    localStorage.setItem('token', data.token);
+    window.location.href = '/';
+  } else {
+    var data = await res.json().catch(function() { return {}; });
+    err.textContent = data.detail || 'Login failed';
+    err.style.display = 'block';
+  }
+});
+</script>
 {% endblock %}

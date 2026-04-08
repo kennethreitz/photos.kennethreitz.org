@@ -1,39 +1,51 @@
 {% extends "base.html" %}
 {% block title %}Sign up — ExifTree{% endblock %}
 {% block content %}
-<div class="auth-form" x-data="{ username: '', email: '', password: '', error: '' }">
+<div class="auth-form">
   <h1>Sign up</h1>
-  <form @submit.prevent="
-    error = '';
-    const res = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, email, password }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      localStorage.setItem('token', data.token);
-      window.location.href = '/';
-    } else {
-      const data = await res.json();
-      error = data.detail || 'Registration failed';
-    }
-  ">
+  <form id="register-form">
     <div class="field">
       <label>Username</label>
-      <input type="text" x-model="username" required autofocus>
+      <input type="text" id="username" required autofocus>
     </div>
     <div class="field">
       <label>Email</label>
-      <input type="email" x-model="email" required>
+      <input type="email" id="email" required>
     </div>
     <div class="field">
       <label>Password</label>
-      <input type="password" x-model="password" required minlength="8">
+      <input type="password" id="password" required minlength="8">
     </div>
-    <p x-show="error" x-text="error" style="color: #f44; font-size: 0.9rem; margin-bottom: 0.5rem;"></p>
+    <p id="error" style="color: #f44; font-size: 0.9rem; margin-bottom: 0.5rem; display: none;"></p>
     <button type="submit" class="btn btn-primary">Sign up</button>
   </form>
   <p class="alt">Already have an account? <a href="{% url 'login' %}">Log in</a></p>
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('register-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  var err = document.getElementById('error');
+  err.style.display = 'none';
+  var res = await fetch('/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      username: document.getElementById('username').value,
+      email: document.getElementById('email').value,
+      password: document.getElementById('password').value,
+    }),
+  });
+  if (res.ok) {
+    var data = await res.json();
+    localStorage.setItem('token', data.token);
+    window.location.href = '/';
+  } else {
+    var data = await res.json().catch(function() { return {}; });
+    err.textContent = data.detail || 'Registration failed';
+    err.style.display = 'block';
+  }
+});
+</script>
 {% endblock %}
