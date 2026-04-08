@@ -6,6 +6,7 @@
   <title>{% block title %}{{ site_title }}{% endblock %}</title>
   <link rel="stylesheet" href="/static/css/style.css?v={{ cache_bust }}">
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+  {% if analytics_code %}{{ analytics_code|safe }}{% endif %}
   {% block head %}{% endblock %}
 </head>
 <body>

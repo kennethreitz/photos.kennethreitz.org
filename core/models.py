@@ -11,6 +11,10 @@ class SiteConfig(models.Model):
         max_length=255, blank=True,
         default="Browse photography through the gear that made it."
     )
+    analytics_code = models.TextField(
+        blank=True,
+        help_text="Analytics snippet (GA, Gauges, etc.) — pasted into the &lt;head&gt; of every page",
+    )
     openai_api_key = models.CharField(
         max_length=255, blank=True,
         help_text="OpenAI API key for AI image descriptions"

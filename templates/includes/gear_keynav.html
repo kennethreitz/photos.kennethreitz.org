@@ -1,0 +1,36 @@
+<script>
+(function() {
+  var cards = Array.from(document.querySelectorAll('.gear-grid > a, .gear-grid .gear-card'));
+  if (!cards.length) return;
+  var idx = -1;
+
+  function getCols() {
+    var cols = 1;
+    var top = cards[0].getBoundingClientRect().top;
+    for (var i = 1; i < cards.length; i++) {
+      if (Math.abs(cards[i].getBoundingClientRect().top - top) < 5) cols++;
+      else break;
+    }
+    return cols;
+  }
+
+  function focus(i) {
+    if (i < 0 || i >= cards.length) return;
+    if (idx >= 0) cards[idx].classList.remove('gear-card-focused');
+    idx = i;
+    cards[idx].classList.add('gear-card-focused');
+    cards[idx].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }
+
+  document.addEventListener('keydown', function(e) {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+    var cols = getCols();
+    if (e.key === 'ArrowRight') { e.preventDefault(); focus(idx < 0 ? 0 : idx + 1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); focus(idx < 0 ? 0 : idx - 1); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); focus(idx < 0 ? 0 : idx + cols); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); focus(idx < 0 ? 0 : idx - cols); }
+    else if (e.key === 'Enter' && idx >= 0) { e.preventDefault(); window.location.href = cards[idx].href; }
+    else if (e.key === 'Escape' && idx >= 0) { cards[idx].classList.remove('gear-card-focused'); idx = -1; }
+  });
+})();
+</script>

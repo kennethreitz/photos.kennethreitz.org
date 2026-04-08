@@ -61,11 +61,34 @@ def lens_list(request):
 
 
 def tag_cloud(request):
-    tags = (
+    import math
+    import random
+
+    tags = list(
         Tag.objects.annotate(image_count=Count('images'))
         .filter(image_count__gt=0)
         .order_by('-image_count')
     )
+
+    if tags:
+        max_count = tags[0].image_count
+        min_count = tags[-1].image_count
+        count_range = max(max_count - min_count, 1)
+
+        min_size = 0.75   # rem
+        max_size = 2.8    # rem
+
+        for tag in tags:
+            # Log scale feels more natural for word clouds
+            if count_range > 1:
+                weight = math.log(tag.image_count - min_count + 1) / math.log(count_range + 1)
+            else:
+                weight = 0.5
+            tag.font_size = round(min_size + weight * (max_size - min_size), 2)
+
+        # Shuffle so it doesn't just go big→small
+        random.shuffle(tags)
+
     return render(request, 'tree/tag_cloud.html', {'tags': tags})
 
 

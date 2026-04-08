@@ -24,5 +24,6 @@ def site_context(request):
     return {
         'site_title': config.site_title,
         'site_tagline': config.tagline,
+        'analytics_code': config.analytics_code,
         'cache_bust': _get_cache_bust(),
     }

@@ -8,7 +8,7 @@
 
 <div class="tag-cloud">
   {% for tag in tags %}
-  <a href="/tags/{{ tag.slug }}/" class="tag-pill">{{ tag.name }}<span class="tag-count">{{ tag.image_count }}</span></a>
+  <a href="/tags/{{ tag.slug }}/" class="tag-cloud-item" style="font-size: {{ tag.font_size }}rem;">{{ tag.name }}</a>
   {% empty %}
   <div class="empty">No tags yet. Tags are generated automatically when AI descriptions are enabled.</div>
   {% endfor %}

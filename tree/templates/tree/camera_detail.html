@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ camera.display_name }} — ExifTree{% endblock %}
+{% block title %}{{ camera.display_name }} — {{ site_title }}{% endblock %}
 {% block content %}
 <div class="page-header">
   <h1>{{ camera.display_name }}</h1>
@@ -19,4 +19,5 @@
   <div class="empty" style="grid-column: 1 / -1;">No images yet for this camera.</div>
   {% endfor %}
 </div>
+{% include "includes/grid_keynav.html" %}
 {% endblock %}

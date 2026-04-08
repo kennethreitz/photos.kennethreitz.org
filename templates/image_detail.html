@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{{ image.ai_title|default:image.title }} — {{ site_title }}{% endblock %}
+{% block title %}{% if image.ai_title %}{{ image.ai_title }} — {% endif %}{{ site_title }}{% endblock %}
 {% block head %}
 {% if image.exif and image.exif.gps_latitude and image.exif.gps_longitude %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -75,12 +75,19 @@
 
   <div style="margin-top: 1rem;">
     <div>
-      <h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem;">{{ image.ai_title|default:image.title }}</h1>
+      {% if image.ai_title %}<h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem;">{{ image.ai_title }}</h1>{% endif %}
       <p style="color: var(--text-muted);">
         {{ image.upload_date|date:"N j, Y" }}
         · {{ image.view_count }} views
       </p>
       {% if image.ai_description %}<p style="margin-top: 0.5rem;">{{ image.ai_description }}</p>{% endif %}
+      {% if user.is_authenticated %}
+      <form method="post" action="{% url 'dashboard-delete-image' image.id %}?next={% if next_image %}/images/{{ next_image.id }}/{% elif prev_image %}/images/{{ prev_image.id }}/{% else %}/{% endif %}" style="margin-top: 0.75rem;"
+            onsubmit="return confirm('Delete this image?')">
+        {% csrf_token %}
+        <button type="submit" class="btn" style="font-size: 0.85rem; color: #f44; border-color: #f44;">Delete</button>
+      </form>
+      {% endif %}
       {% if image.description and image.description != image.ai_description %}<p style="margin-top: 0.5rem; color: var(--text-muted);">{{ image.description }}</p>{% endif %}
       {% if image.tags.all %}
       <div style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.3rem;">
@@ -104,5 +111,29 @@
     });
   </script>
   {% endif %}
+
+  <!-- Prev/Next nav -->
+  {% if prev_image or next_image %}
+  <div style="display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border);">
+    {% if prev_image %}<a href="/images/{{ prev_image.id }}/" class="btn" id="prev-link">&larr; Previous</a>{% else %}<span></span>{% endif %}
+    {% if next_image %}<a href="/images/{{ next_image.id }}/" class="btn" id="next-link">Next &rarr;</a>{% endif %}
+  </div>
+  {% endif %}
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.addEventListener('keydown', function(e) {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if (e.key === 'ArrowLeft') {
+    var prev = document.getElementById('prev-link');
+    if (prev) prev.click();
+  } else if (e.key === 'ArrowRight') {
+    var next = document.getElementById('next-link');
+    if (next) next.click();
+  } else if (e.key === 'o' || e.key === 'O') {
+    {% if image.original %}window.location.href = '{{ image.original.url }}';{% endif %}
+  }
+});
+</script>
 {% endblock %}

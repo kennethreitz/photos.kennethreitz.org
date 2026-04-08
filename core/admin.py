@@ -8,7 +8,7 @@ from core.models import Camera, ExifData, Image, Lens, SiteConfig, Tag, User
 class SiteConfigAdmin(admin.ModelAdmin):
     list_display = ['site_title', 'tagline']
     fieldsets = [
-        ("Site", {'fields': ('site_title', 'tagline')}),
+        ("Site", {'fields': ('site_title', 'tagline', 'analytics_code')}),
         ("AI", {'fields': ('openai_api_key', 'ai_prompt')}),
     ]
 

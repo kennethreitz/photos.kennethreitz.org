@@ -48,7 +48,18 @@ def image_detail(request, image_id):
     Image.objects.filter(id=image_id).update(view_count=m.F('view_count') + 1)
     image.view_count += 1
 
-    return render(request, 'image_detail.html', {'image': image})
+    # Prev/next navigation
+    base_qs = Image.objects.filter(
+        visibility=Image.Visibility.PUBLIC, is_processing=False,
+    ).order_by('-upload_date')
+    prev_image = base_qs.filter(upload_date__gt=image.upload_date).order_by('upload_date').first()
+    next_image = base_qs.filter(upload_date__lt=image.upload_date).first()
+
+    return render(request, 'image_detail.html', {
+        'image': image,
+        'prev_image': prev_image,
+        'next_image': next_image,
+    })
 
 
 @login_required
@@ -100,6 +111,9 @@ def dashboard_delete_collection(request, collection_id):
 @require_POST
 def dashboard_delete_image(request, image_id):
     Image.objects.filter(id=image_id, user=request.user).delete()
+    next_url = request.GET.get('next') or request.POST.get('next', '')
+    if next_url and next_url.startswith('/'):
+        return redirect(next_url)
     return redirect('dashboard')
 
 

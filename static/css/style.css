@@ -136,7 +136,8 @@ a:hover { color: var(--accent-hover); }
   object-fit: cover;
   display: block;
 }
-.image-card:hover, .image-card-selected { transform: scale(1.02); }
+.image-card:hover, .image-card-selected, .image-card-focused { transform: scale(1.02); }
+.image-card-focused { outline: 2px solid var(--accent); outline-offset: 2px; }
 .image-card-selected { outline: 2px solid var(--accent); outline-offset: 2px; }
 .image-card .overlay {
   position: absolute;
@@ -175,7 +176,8 @@ a:hover { color: var(--accent-hover); }
   border-radius: var(--radius);
   transition: border-color 0.15s;
 }
-.gear-card:hover { border-color: var(--text-muted); }
+.gear-card:hover, .gear-card-focused { border-color: var(--text-muted); }
+.gear-card-focused { outline: 2px solid var(--accent); outline-offset: -2px; }
 
 /* Brand filter pills */
 .brand-pill {
@@ -517,10 +519,19 @@ a:hover { color: var(--accent-hover); }
 .tag-cloud {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.4rem 0.75rem;
   justify-content: center;
-  padding: 1rem 0;
+  align-items: center;
+  padding: 2rem 0;
+  line-height: 1.8;
 }
+
+.tag-cloud-item {
+  color: var(--text-muted);
+  transition: color 0.15s;
+  white-space: nowrap;
+}
+.tag-cloud-item:hover { color: var(--accent); }
 
 .tag-pill {
   display: inline-flex;

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Lenses — ExifTree{% endblock %}
+{% block title %}Lenses — {{ site_title }}{% endblock %}
 {% block content %}
 <div class="page-header">
   <h1>Lenses</h1>
@@ -34,4 +34,7 @@
   <div class="empty" style="grid-column: 1 / -1;">No lenses match your filter.</div>
   {% endfor %}
 </div>
+{% endblock %}
+{% block scripts %}
+{% include "includes/gear_keynav.html" %}
 {% endblock %}
