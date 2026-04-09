@@ -23,7 +23,7 @@ THUMBNAIL_SIZES = {
     'large': (1600, 1600),
 }
 
-ALLOWED_FORMATS = {'JPEG', 'PNG', 'WEBP', 'TIFF'}
+ALLOWED_FORMATS = {'JPEG', 'PNG', 'WEBP', 'TIFF', 'MPO'}
 
 
 def process_image(image: Image) -> None:
