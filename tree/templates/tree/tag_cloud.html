@@ -3,14 +3,27 @@
 {% block content %}
 <div class="page-header">
   <h1>Tags</h1>
-  <p>Browse photos by tag</p>
+  <p>{{ tags|length }} tags</p>
 </div>
 
-<div class="tag-cloud">
+<input type="text" id="tag-filter" placeholder="Filter tags..."
+  style="width: 100%; max-width: 400px; padding: 0.5rem 0.75rem; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); margin-bottom: 1.5rem;">
+
+<div class="tag-cloud" id="tag-cloud">
   {% for tag in tags %}
-  <a href="/tags/{{ tag.slug }}/" class="tag-cloud-item" style="font-size: {{ tag.font_size }}rem;">{{ tag.name }}</a>
+  <a href="/tags/{{ tag.slug }}/" class="tag-cloud-item" style="font-size: {{ tag.font_size }}rem;" data-name="{{ tag.name }}">{{ tag.name }}</a>
   {% empty %}
   <div class="empty">No tags yet. Tags are generated automatically when AI descriptions are enabled.</div>
   {% endfor %}
 </div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('tag-filter').addEventListener('input', function() {
+  var q = this.value.toLowerCase();
+  document.querySelectorAll('#tag-cloud .tag-cloud-item').forEach(function(el) {
+    el.style.display = el.dataset.name.includes(q) ? '' : 'none';
+  });
+});
+</script>
 {% endblock %}
