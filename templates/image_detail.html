@@ -81,13 +81,6 @@
         · {{ image.view_count }} views
       </p>
       {% if image.ai_description %}<p style="margin-top: 0.5rem;">{{ image.ai_description }}</p>{% endif %}
-      {% if user.is_authenticated %}
-      <form method="post" action="{% url 'dashboard-delete-image' image.id %}?next={% if next_image %}/images/{{ next_image.id }}/{% elif prev_image %}/images/{{ prev_image.id }}/{% else %}/{% endif %}" style="margin-top: 0.75rem;"
-            onsubmit="return confirm('Delete this image?')">
-        {% csrf_token %}
-        <button type="submit" class="btn" style="font-size: 0.85rem; color: #f44; border-color: #f44;">Delete</button>
-      </form>
-      {% endif %}
       {% if image.description and image.description != image.ai_description %}<p style="margin-top: 0.5rem; color: var(--text-muted);">{{ image.description }}</p>{% endif %}
       {% if image.tags.all %}
       <div style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.3rem;">
