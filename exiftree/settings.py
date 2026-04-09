@@ -236,9 +236,6 @@ LOGGING = {
     },
 }
 
-LOGIN_REDIRECT_URL = '/'
-LOGIN_URL = '/login/'
-
 # Email — configure a real backend in production
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "ExifTree <noreply@exiftree.org>"

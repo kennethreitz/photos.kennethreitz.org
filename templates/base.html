@@ -38,27 +38,6 @@
       {% if has_collections %}<a href="{% url 'gallery:collection-list' %}">Collections</a>{% endif %}
       <a href="{% url 'search:search' %}">Search</a>
     </div>
-    <div class="nav-auth">
-      {% if user.is_authenticated %}
-      <div class="nav-user-dropdown">
-        <button class="nav-user-btn" id="nav-user-btn"
-                onclick="document.getElementById('nav-dropdown').style.display = document.getElementById('nav-dropdown').style.display === 'block' ? 'none' : 'block'">
-          @{{ user.username }}
-        </button>
-        <div class="dropdown-menu" id="nav-dropdown" style="display: none;">
-          <a href="/dashboard/">Dashboard</a>
-          <a href="/manage/">Manage Photos</a>
-          <a href="/upload/">Upload</a>
-          <hr>
-          <form method="post" action="{% url 'logout' %}">
-            {% csrf_token %}
-            <button type="submit" style="background: none; border: none; color: var(--text); cursor: pointer; padding: 0.5rem 1rem; font-size: 0.9rem; width: 100%; text-align: left;">Log out</button>
-          </form>
-        </div>
-      </div>
-      {% else %}
-      <a href="{% url 'login' %}">Log in</a>
-      {% endif %}
     </div>
   </nav>
 
