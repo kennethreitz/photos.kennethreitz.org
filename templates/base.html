@@ -67,7 +67,7 @@
   </main>
 
   <footer class="site-footer">
-    <p>{{ site_title }}{% if site_tagline %} — {{ site_tagline }}{% endif %}</p>
+    <p>{% if site_tagline %}{{ site_tagline }}{% else %}{{ site_title }}{% endif %}</p>
   </footer>
 
   <script>
