@@ -95,7 +95,7 @@ def oembed(request):
             ).exclude(thumbnail_small='')[:45]
         )
         grid_html = f'<div style="max-width:500px;"><p><strong>{col.title}</strong></p>'
-        grid_html += '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-width:500px;">'
+        grid_html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-width:500px;">'
         for img in photos:
             thumb = img.thumbnail_small or img.thumbnail_medium
             if thumb:
@@ -128,7 +128,7 @@ def oembed(request):
         if not photos:
             return JsonResponse({'error': 'No photos'}, status=404)
 
-        grid_html = '<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;max-width:500px;">'
+        grid_html = '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;max-width:500px;">'
         for img in photos:
             thumb = img.thumbnail_small or img.thumbnail_medium
             if thumb:
