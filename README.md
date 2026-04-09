@@ -1,6 +1,6 @@
-# ExifTree
+# photos.kennethreitz.org
 
-A personal photography portfolio that organizes your work by the gear, places, and subjects that define it. Powered by EXIF metadata and AI.
+A personal photography portfolio that organizes your work by the gear, places, and subjects that define it. Powered by EXIF metadata and AI. Codename: **ExifTree**.
 
 **Live:** [photos.kennethreitz.org](https://photos.kennethreitz.org)
 
