@@ -1,6 +1,9 @@
 app = 'exiftree'
 primary_region = 'iad'
 
+[deploy]
+  strategy = "bluegreen"
+
 [build]
 
 [processes]
