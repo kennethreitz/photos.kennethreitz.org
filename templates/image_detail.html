@@ -35,12 +35,18 @@
 {% endblock %}
 {% block content %}
 <div>
-  <div style="margin-bottom: 1.5rem;">
+  <!-- Title & Description -->
+  {% if image.ai_title %}<h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem;">{{ image.ai_title }}</h1>{% endif %}
+  {% if image.ai_description %}<p style="margin-bottom: 1rem;">{{ image.ai_description }}</p>{% endif %}
+
+  <!-- Image -->
+  <div style="margin-bottom: 1rem;">
     {% if image.thumbnail_large %}<img src="{{ image.thumbnail_large.url }}" alt="{{ image.ai_title|default:image.title }}" style="max-width: 100%; border-radius: var(--radius);">
     {% elif image.thumbnail_medium %}<img src="{{ image.thumbnail_medium.url }}" alt="{{ image.ai_title|default:image.title }}" style="max-width: 100%; border-radius: var(--radius);">
     {% elif image.thumbnail_small %}<img src="{{ image.thumbnail_small.url }}" alt="{{ image.ai_title|default:image.title }}" style="max-width: 100%; border-radius: var(--radius);">{% endif %}
   </div>
 
+  <!-- EXIF bar -->
   {% if image.exif %}
   <div class="exif-bar" style="display: flex; justify-content: space-between; align-items: center;">
     <div style="display: flex; flex-wrap: wrap; gap: 1.5rem;">
@@ -100,22 +106,16 @@
   </div>
   {% endif %}
 
-  <div style="margin-top: 1rem;">
-    <div>
-      {% if image.ai_title %}<h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem;">{{ image.ai_title }}</h1>{% endif %}
-      <p style="color: var(--text-muted);">
-        {{ image.view_count }} views
-      </p>
-      {% if image.ai_description %}<p style="margin-top: 0.5rem;">{{ image.ai_description }}</p>{% endif %}
-      {% if image.description and image.description != image.ai_description %}<p style="margin-top: 0.5rem; color: var(--text-muted);">{{ image.description }}</p>{% endif %}
-      {% if image.tags.all %}
-      <div style="margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 0.3rem;">
-        {% for tag in image.tags.all %}
-        <a href="/tags/{{ tag.slug }}/" class="tag-pill" style="font-size: 0.8rem; padding: 0.2rem 0.6rem;">{{ tag.name }}</a>
-        {% endfor %}
-      </div>
-      {% endif %}
+  <!-- Tags & views -->
+  <div style="margin-top: 0.75rem;">
+    {% if image.tags.all %}
+    <div style="display: flex; flex-wrap: wrap; gap: 0.3rem; margin-bottom: 0.5rem;">
+      {% for tag in image.tags.all %}
+      <a href="/tags/{{ tag.slug }}/" class="tag-pill" style="font-size: 0.8rem; padding: 0.2rem 0.6rem;">{{ tag.name }}</a>
+      {% endfor %}
     </div>
+    {% endif %}
+    <p style="color: var(--text-muted); font-size: 0.85rem;">{{ image.view_count }} views</p>
   </div>
 
   {% if image.exif and image.exif.gps_latitude and image.exif.gps_longitude %}
