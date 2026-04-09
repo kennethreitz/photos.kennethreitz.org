@@ -35,9 +35,6 @@
 {% endblock %}
 {% block content %}
 <div>
-  <!-- Title -->
-  {% if image.ai_title %}<h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.75rem;">{{ image.ai_title }}</h1>{% endif %}
-
   <!-- Image -->
   <div style="margin-bottom: 1rem;">
     {% if image.thumbnail_large %}<img src="{{ image.thumbnail_large.url }}" alt="{{ image.ai_title|default:image.title }}" style="max-width: 100%; border-radius: var(--radius);">
@@ -45,7 +42,8 @@
     {% elif image.thumbnail_small %}<img src="{{ image.thumbnail_small.url }}" alt="{{ image.ai_title|default:image.title }}" style="max-width: 100%; border-radius: var(--radius);">{% endif %}
   </div>
 
-  <!-- Description -->
+  <!-- Title & Description -->
+  {% if image.ai_title %}<h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem;">{{ image.ai_title }}</h1>{% endif %}
   {% if image.ai_description %}<p style="margin-bottom: 1rem;">{{ image.ai_description }}</p>{% endif %}
 
   <!-- EXIF bar -->
