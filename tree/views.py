@@ -59,6 +59,16 @@ def camera_list(request):
     })
 
 
+def camera_list_all(request):
+    cameras = Camera.objects.annotate(
+        image_count=Count('images')
+    ).filter(image_count__gt=0).order_by('manufacturer', 'model')
+    brands = list(cameras.values_list('manufacturer', flat=True).distinct().order_by('manufacturer'))
+    return render(request, 'tree/camera_list.html', {
+        'cameras': cameras, 'brands': brands, 'selected_brand': '', 'query': '', 'show_all': True,
+    })
+
+
 def camera_detail(request, slug):
     camera = get_object_or_404(Camera, slug=slug)
     qs = (
@@ -101,13 +111,23 @@ def lens_list(request):
     })
 
 
+def lens_list_all(request):
+    lenses = Lens.objects.annotate(
+        image_count=Count('images')
+    ).filter(image_count__gt=0).order_by('manufacturer', 'model')
+    brands = list(lenses.values_list('manufacturer', flat=True).distinct().order_by('manufacturer'))
+    return render(request, 'tree/lens_list.html', {
+        'lenses': lenses, 'brands': brands, 'selected_brand': '', 'query': '', 'show_all': True,
+    })
+
+
 def tag_cloud(request):
     import math
     import random
 
     tags = list(
         Tag.objects.annotate(image_count=Count('images'))
-        .filter(image_count__gt=0)
+        .filter(image_count__gte=5)
         .order_by('-image_count')
     )
 

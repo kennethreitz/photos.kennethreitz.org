@@ -34,6 +34,11 @@
   <div class="empty" style="grid-column: 1 / -1;">No lenses match your filter.</div>
   {% endfor %}
 </div>
+{% if not show_all %}
+<div style="text-align: center; margin-top: 2rem;">
+  <a href="{% url 'tree:lens-list-all' %}" class="btn">View all lenses</a>
+</div>
+{% endif %}
 {% endblock %}
 {% block scripts %}
 {% include "includes/gear_keynav.html" %}
