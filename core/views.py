@@ -85,7 +85,8 @@ def _oembed_grid_item(img, thumb):
             overlay = (
                 f'<div style="position:absolute;bottom:0;left:0;right:0;padding:4px 6px;'
                 f'background:linear-gradient(transparent,rgba(0,0,0,0.8));'
-                f'color:rgba(255,255,255,0.75);font-size:0.6em;line-height:1.3;">'
+                f'color:rgba(255,255,255,0.75);font-size:0.6em;line-height:1.3;'
+                f'font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;">'
                 f'{"<br>".join(parts)}</div>'
             )
     except Exception:
