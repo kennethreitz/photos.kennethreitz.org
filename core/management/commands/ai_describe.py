@@ -32,6 +32,10 @@ class Command(BaseCommand):
             help="Re-describe images that already have descriptions",
         )
         parser.add_argument(
+            '--tail', action='store_true',
+            help="Watch for new images and describe them continuously",
+        )
+        parser.add_argument(
             '--dry-run', action='store_true',
             help="Show what would be processed without processing",
         )
@@ -44,6 +48,10 @@ class Command(BaseCommand):
             self.stderr.write(self.style.ERROR(
                 "No OpenAI API key configured. Set it in /admin/core/siteconfig/"
             ))
+            return
+
+        if options['tail']:
+            self._tail(options)
             return
 
         qs = Image.objects.filter(is_processing=False).order_by('-upload_date')
@@ -105,3 +113,41 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS(
             f"\nDone: {done - errors} described, {errors} errors"
         ))
+
+    def _tail(self, options):
+        import time
+
+        from django.db import connection
+
+        from ingest.tasks import generate_ai_description_task
+
+        self.stdout.write("Watching for new images... (Ctrl+C to stop)")
+        described = 0
+
+        try:
+            while True:
+                connection.close()
+                images = list(
+                    Image.objects.filter(
+                        is_processing=False, ai_description='',
+                    ).order_by('upload_date')[:10]
+                )
+
+                if not images:
+                    time.sleep(5)
+                    continue
+
+                for img in images:
+                    try:
+                        connection.close()
+                        generate_ai_description_task(str(img.id))
+                        connection.close()
+                        img.refresh_from_db()
+                        described += 1
+                        title = img.ai_title or img.title or img.id
+                        self.stdout.write(f"  [{described}] {title} → /images/{img.id}/")
+                    except Exception as e:
+                        self.stderr.write(self.style.ERROR(f"  ERROR {img.id}: {e}"))
+
+        except KeyboardInterrupt:
+            self.stdout.write(self.style.SUCCESS(f"\nStopped. Described {described} images."))
