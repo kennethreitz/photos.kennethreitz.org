@@ -208,6 +208,16 @@ LOGGING = {
             'level': 'WARNING',
             'propagate': False,
         },
+        'urllib3.connectionpool': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'botocore': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
         'ingest': {
             'handlers': ['console'],
             'level': 'INFO',
