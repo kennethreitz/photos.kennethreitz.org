@@ -210,9 +210,20 @@ class City(models.Model):
 
         cc = r['cc']
 
-        # Reject known-bad GPS countries
-        if cc in ('CN', 'IN', 'JP', 'KG', 'MN', 'RU'):
+        # Reject known-bad GPS countries (with exceptions)
+        INVALID_COUNTRIES = {'CN', 'JP', 'KG', 'MN', 'RU'}
+        ALLOWED_CITIES_BY_COUNTRY = {
+            'IN': {'Mysore', 'Bangalore', 'Bengaluru', 'Mysuru'},
+        }
+
+        if cc in INVALID_COUNTRIES:
             return None
+        if cc in ALLOWED_CITIES_BY_COUNTRY:
+            city_name_check = r['name']
+            admin2_check = r.get('admin2', '')
+            allowed = ALLOWED_CITIES_BY_COUNTRY[cc]
+            if city_name_check not in allowed and admin2_check not in allowed:
+                return None
 
         continent_code = COUNTRY_TO_CONTINENT.get(cc, 'NA')
         continent = CONTINENT_MAP.get(continent_code, 'Unknown')
