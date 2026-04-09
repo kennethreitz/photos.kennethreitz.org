@@ -198,9 +198,16 @@ def city_list(request):
                 grouped[city.continent][city.country] = []
             grouped[city.continent][city.country].append(city)
 
+    # All cities for the map (no minimum)
+    all_cities = (
+        City.objects.annotate(image_count=Count('images'))
+        .filter(image_count__gt=0)
+    )
+
     return render(request, 'tree/city_list.html', {
         'grouped': grouped,
         'us_states': us_states,
+        'all_cities': all_cities,
     })
 
 

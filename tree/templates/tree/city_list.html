@@ -1,10 +1,35 @@
 {% extends "base.html" %}
 {% block title %}Cities — {{ site_title }}{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% endblock %}
 {% block content %}
 <div class="page-header">
   <h1>Cities</h1>
   <p>Browse photos by location</p>
 </div>
+
+<div id="cities-map" style="height: 400px; border-radius: var(--radius); margin-bottom: 2rem;"></div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var map = L.map('cities-map').setView([30, 0], 2);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OSM &copy; CARTO', maxZoom: 19,
+  }).addTo(map);
+  var cities = [
+    {% for city in all_cities %}
+    {lat: {{ city.latitude }}, lon: {{ city.longitude }}, name: "{{ city.display_name|escapejs }}", count: {{ city.image_count }}, slug: "{{ city.slug }}"},
+    {% endfor %}
+  ];
+  cities.forEach(function(c) {
+    L.circleMarker([c.lat, c.lon], {
+      radius: Math.min(Math.max(Math.sqrt(c.count) * 2, 4), 20),
+      color: '#e8a820', fillColor: '#e8a820', fillOpacity: 0.7, weight: 1,
+    }).addTo(map).bindPopup('<a href="/cities/' + c.slug + '/" style="color: #e8a820; font-weight: 600;">' + c.name + '</a><br>' + c.count + ' photos');
+  });
+});
+</script>
 
 {% if us_states %}
 <div style="margin-bottom: 2.5rem;">
