@@ -1,19 +1,57 @@
 # ExifTree
 
-**Browse photography through the gear that made it.**
+A personal photography portfolio that organizes your work by the gear, places, and subjects that define it. Powered by EXIF metadata and AI.
 
-ExifTree is a community platform where visual creators showcase their work, organized around the cameras and lenses used to create it. Upload a photo, and its EXIF metadata automatically places it in a browsable tree of gear — every camera, every lens, every focal length.
+**Live:** [photos.kennethreitz.org](https://photos.kennethreitz.org)
 
-## What it does
+## Features
 
-- **Gear trees** — Click a camera and see every image shot on it, across all users. Click a lens and browse the world through that glass.
-- **Automatic organization** — EXIF metadata is extracted on upload and normalized so "NIKON CORPORATION NIKON D850" and "Nikon D850" show up in the same place.
-- **User portfolios** — Curate collections, build a profile, showcase your work.
-- **Community groups** — Spaces for photographers to share work around themes, gear, or anything else.
-- **Deep filtering** — Search by camera, lens, focal length, aperture, ISO, or any combination.
+- **Browse by gear** — Every camera and lens gets its own page with infinite scroll
+- **AI-powered metadata** — GPT-4o-mini generates titles, descriptions, and tags for every photo
+- **Tag cloud** — Thousands of AI-generated tags with word cloud discovery
+- **Cities** — GPS coordinates are reverse-geocoded to browsable locations, grouped by country and state
+- **EXIF everywhere** — Camera, lens, focal length, aperture, shutter speed, ISO, date taken
+- **Photo manager** — Bulk select, visibility controls, faceted filtering by camera/lens/year
+- **Search** — Full-text across titles, AI descriptions, and tags
+- **Infinite scroll** — Shuffled, session-stable ordering across all pages
+- **Collections** — Organize photos into curated sets
+- **Keyboard navigation** — Arrow keys between images, O for original download
 
-## Why
+## Stack
 
-Photography platforms organize by photographer or by date. ExifTree organizes by *how the image was made*. Curious what the Fujifilm X100V actually looks like in the real world? Want to see what people are doing with vintage manual lenses? Browse the tree.
+- **Django 6** + **django-bolt** (async ASGI server with API)
+- **PostgreSQL** on Fly.io (also used as Celery broker)
+- **Celery** for async image processing and AI description generation
+- **Tigris** (S3-compatible) for image storage
+- **HTMX** for infinite scroll, vanilla JS where needed
+- **OpenAI** GPT-4o-mini with structured output for image metadata
 
-**Domain:** [exiftree.org](https://exiftree.org)
+## Management Commands
+
+```
+manage.py import_folder /path/to/photos     # Bulk import from disk
+manage.py import_flickr <username>           # Import from Flickr
+manage.py ai_describe                        # Backfill AI descriptions
+manage.py ai_describe --tail                 # Watch and describe new images
+manage.py geocode                            # Reverse geocode GPS to cities
+manage.py cleanup                            # Run cleanup rules
+manage.py dedupe                             # Remove visual duplicates
+manage.py reprocess                          # Re-process stuck images
+```
+
+## Development
+
+```
+brew install redis
+brew services start redis
+cp .env.example .env  # Configure DATABASE_URL, AWS keys, etc.
+make run
+```
+
+## Deployment
+
+Deployed on [Fly.io](https://fly.io) with two processes (web + worker).
+
+```
+fly deploy
+```
