@@ -101,7 +101,7 @@ def oembed(request):
             if thumb:
                 grid_html += f'<a href="https://photos.kennethreitz.org/images/{img.id}/"><img src="{thumb.url}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px;"></a>'
         grid_html += '</div>'
-        grid_html += f'<p style="text-align:center;margin-top:8px;"><a href="https://photos.kennethreitz.org/collections/{col.slug}/" style="color:#888;">See more at photos.kennethreitz.org</a></p></div>'
+        grid_html += f'<p style="text-align:center;margin-top:8px;"><a href="https://photos.kennethreitz.org/collections/{col.slug}/" style="color:#888;">See more at photos.kennethreitz.org.</a></p></div>'
 
         return JsonResponse({
             'version': '1.0',
@@ -134,7 +134,7 @@ def oembed(request):
             if thumb:
                 grid_html += f'<a href="https://photos.kennethreitz.org/images/{img.id}/"><img src="{thumb.url}" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px;"></a>'
         grid_html += '</div>'
-        grid_html += f'<p style="text-align:center;margin-top:8px;"><a href="https://photos.kennethreitz.org" style="color:#888;">See more at photos.kennethreitz.org</a></p>'
+        grid_html += f'<p style="text-align:center;margin-top:8px;"><a href="https://photos.kennethreitz.org" style="color:#888;">See more at photos.kennethreitz.org.</a></p>'
 
         return JsonResponse({
             'version': '1.0',
@@ -196,7 +196,7 @@ def oembed(request):
         html_parts.append(f'<p>{description}</p>')
     if exif_line:
         html_parts.append(f'<p style="color:#888;font-size:0.85em;">{exif_line}</p>')
-    html_parts.append(f'<p style="text-align:center;margin-top:4px;"><a href="https://photos.kennethreitz.org/images/{image.id}/" style="color:#888;">See more at photos.kennethreitz.org</a></p></div>')
+    html_parts.append(f'<p style="text-align:center;margin-top:4px;"><a href="https://photos.kennethreitz.org/images/{image.id}/" style="color:#888;">See more at photos.kennethreitz.org.</a></p></div>')
 
     data['html'] = '\n'.join(html_parts)
     data['type'] = 'rich'

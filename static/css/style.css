@@ -150,6 +150,9 @@ a:hover { color: var(--accent-hover); }
   font-size: 0.75rem;
   line-height: 1.4;
 }
+.image-card .overlay .exif-row { display: flex; justify-content: space-between; gap: 0.5rem; }
+.image-card .overlay .exif-left { display: flex; flex-direction: column; gap: 0.1rem; }
+.image-card .overlay .exif-right { display: flex; gap: 0.4rem; white-space: nowrap; align-items: flex-end; }
 .image-card .overlay a.overlay-link { color: rgba(255,255,255,0.85); }
 .image-card .overlay a.overlay-link:hover { color: var(--accent); }
 .image-card-user {
