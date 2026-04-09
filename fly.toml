@@ -34,7 +34,7 @@ primary_region = 'iad'
     interval = 10000
     grace_period = "5s"
     method = "GET"
-    path = "/"
+    path = "/health"
     timeout = 2000
 
 [env]

@@ -121,6 +121,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("sitemap.xml", sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path("robots.txt", TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
+    path("health", lambda r: HttpResponse("ok")),
     path("favicon.ico", lambda r: HttpResponse(status=204)),
     path("apple-touch-icon.png", lambda r: HttpResponse(status=204)),
     path("apple-touch-icon-precomposed.png", lambda r: HttpResponse(status=204)),
