@@ -50,6 +50,13 @@ DELETE_RULES = [
 INVALID_COUNTRIES = ['CN', 'JP', 'KG', 'MN', 'RU']  # Bad GPS data — never visited
 ALLOWED_CITIES = {'Bangalore', 'Mysore', 'Bengaluru', 'Mysuru'}  # Valid Indian cities
 
+PRIVACY_RULES = [
+    {
+        'name': "Make Jan 5, 2019 photos private",
+        'filter': Q(exif__date_taken__date='2019-01-05'),
+    },
+]
+
 FIX_RULES = [
     {
         'name': "Clear incorrect dates before 2008",
@@ -117,6 +124,20 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS(
                     f"  {rule['name']}: {count} fixed"
                 ))
+
+        # Privacy rules
+        self.stdout.write("\nPrivacy rules:")
+        for rule in PRIVACY_RULES:
+            qs = Image.objects.filter(rule['filter']).exclude(visibility='private')
+            count = qs.count()
+            if count == 0:
+                self.stdout.write(f"  {rule['name']}: 0 matches")
+                continue
+            if dry_run:
+                self.stdout.write(self.style.WARNING(f"  {rule['name']}: {count} would be made private"))
+            else:
+                qs.update(visibility='private')
+                self.stdout.write(self.style.SUCCESS(f"  {rule['name']}: {count} made private"))
 
         # City cleanup
         self.stdout.write("\nCity rules:")

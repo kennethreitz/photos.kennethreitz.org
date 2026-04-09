@@ -154,6 +154,11 @@ def _cleanup_image(image: Image, exif: dict) -> bool:
         image.delete()
         return True
 
+    # Privacy rules — make certain dates private
+    PRIVATE_DATES = {'2019-01-05'}
+    if date_str in PRIVATE_DATES:
+        image.visibility = 'private'
+
     # Fix rules — clear bad dates
     if year < 2008 or year >= 2021:
         from core.models import ExifData
