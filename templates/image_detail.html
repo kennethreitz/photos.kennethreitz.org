@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}{% if image.ai_title %}{{ image.ai_title }} — {% endif %}{{ site_title }}{% endblock %}
+{% block title %}{% if image.ai_title %}{{ image.ai_title }}{% if image.exif and image.exif.camera %} | {{ image.exif.camera.display_name }}{% endif %} — {{ site_title }}{% endif %}{% endblock %}
 {% block meta_description %}{% if image.ai_description %}{{ image.ai_description }}{% else %}{{ site_tagline }}{% endif %}{% endblock %}
 {% block og_title %}{% if image.ai_title %}{{ image.ai_title }}{% else %}Photo{% endif %}{% endblock %}
 {% block og_description %}{% if image.ai_description %}{{ image.ai_description }}{% elif image.exif and image.exif.camera %}Shot on {{ image.exif.camera.display_name }}{% endif %}{% endblock %}
