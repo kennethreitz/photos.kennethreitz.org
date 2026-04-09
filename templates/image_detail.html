@@ -93,9 +93,9 @@
     </div>
     {% endif %}
     </div>
-    <details style="position: relative;">
+    <details style="position: relative; z-index: 50;">
       <summary class="btn">Download</summary>
-      <div class="dropdown-menu" style="right: 0; min-width: 180px; margin-top: 0.25rem;">
+      <div class="dropdown-menu" style="right: 0; min-width: 180px; margin-top: 0.25rem; z-index: 50;">
         {% if image.thumbnail_small %}<a href="{{ image.thumbnail_small.url }}" download><strong>S</strong> <span style="color: var(--text-muted);">Small (300px)</span></a>{% endif %}
         {% if image.thumbnail_medium %}<a href="{{ image.thumbnail_medium.url }}" download><strong>M</strong> <span style="color: var(--text-muted);">Medium (800px)</span></a>{% endif %}
         {% if image.thumbnail_large %}<a href="{{ image.thumbnail_large.url }}" download><strong>L</strong> <span style="color: var(--text-muted);">Large (1600px)</span></a>{% endif %}
