@@ -160,24 +160,28 @@ def city_list(request):
         .order_by('continent', 'country', 'region', 'name')
     )
 
-    # Group by continent > country (> state for US)
+    # Group by continent > country > (state for US)
     grouped = OrderedDict()
+    us_states = OrderedDict()
+
     for city in cities:
         if city.continent not in grouped:
             grouped[city.continent] = OrderedDict()
-        country_key = city.country
-        if city.country_code == 'US':
-            # Group US by state
-            state_key = f"United States — {city.region}" if city.region else "United States"
-            if state_key not in grouped[city.continent]:
-                grouped[city.continent][state_key] = []
-            grouped[city.continent][state_key].append(city)
-        else:
-            if country_key not in grouped[city.continent]:
-                grouped[city.continent][country_key] = []
-            grouped[city.continent][country_key].append(city)
 
-    return render(request, 'tree/city_list.html', {'grouped': grouped})
+        if city.country_code == 'US':
+            state = city.region or 'Other'
+            if state not in us_states:
+                us_states[state] = []
+            us_states[state].append(city)
+        else:
+            if city.country not in grouped[city.continent]:
+                grouped[city.continent][city.country] = []
+            grouped[city.continent][city.country].append(city)
+
+    return render(request, 'tree/city_list.html', {
+        'grouped': grouped,
+        'us_states': us_states,
+    })
 
 
 def city_detail(request, slug):

@@ -6,6 +6,22 @@
   <p>Browse photos by location</p>
 </div>
 
+{% if us_states %}
+<div style="margin-bottom: 2.5rem;">
+  <h2 style="font-size: 1.4rem; margin-bottom: 1rem; color: var(--accent);">United States</h2>
+  {% for state, cities in us_states.items %}
+  <div style="margin-bottom: 1.25rem; margin-left: 1rem;">
+    <h3 style="font-size: 1.1rem; margin-bottom: 0.5rem; color: var(--text-muted);">{{ state }}</h3>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; margin-left: 0.5rem;">
+      {% for city in cities %}
+      <a href="/cities/{{ city.slug }}/" class="tag-pill">{{ city.name }}<span class="tag-count">{{ city.image_count }}</span></a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
 {% for continent, countries in grouped.items %}
 <div style="margin-bottom: 2.5rem;">
   <h2 style="font-size: 1.4rem; margin-bottom: 1rem; color: var(--accent);">{{ continent }}</h2>
@@ -21,7 +37,9 @@
   </div>
   {% endfor %}
 </div>
-{% empty %}
-<div class="empty">No geotagged photos yet. Run <code>manage.py geocode</code> to assign cities.</div>
 {% endfor %}
+
+{% if not us_states and not grouped %}
+<div class="empty">No geotagged photos yet. Run <code>manage.py geocode</code> to assign cities.</div>
+{% endif %}
 {% endblock %}
