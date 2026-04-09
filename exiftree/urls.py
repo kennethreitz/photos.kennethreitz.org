@@ -5,6 +5,7 @@ from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.sitemaps import Sitemap
 from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
+from django.http import HttpResponse
 from django.views.generic import TemplateView
 
 from core.views import (
@@ -112,6 +113,9 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("sitemap.xml", sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path("robots.txt", TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
+    path("favicon.ico", lambda r: HttpResponse(status=204)),
+    path("apple-touch-icon.png", lambda r: HttpResponse(status=204)),
+    path("apple-touch-icon-precomposed.png", lambda r: HttpResponse(status=204)),
     path("", home, name="home"),
     path("login/", LoginView.as_view(template_name='registration/login.html'), name="login"),
     path("logout/", LogoutView.as_view(next_page='/'), name="logout"),
