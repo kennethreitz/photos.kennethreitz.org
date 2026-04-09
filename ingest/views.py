@@ -49,12 +49,25 @@ def upload_image(request):
         is_processing=True,
     )
 
+    def _process_and_describe(image_id):
+        from django.db import connection
+        connection.close()
+        from ingest.pipeline import process_image
+        from ingest.tasks import generate_ai_description_task
+        try:
+            img = Image.objects.get(id=image_id)
+            process_image(img)
+            generate_ai_description_task(str(image_id))
+        except Exception:
+            pass
+        finally:
+            connection.close()
+
     try:
         process_image_task.apply_async(args=[str(img.id)], ignore_result=True)
     except Exception:
         # No Celery — process in a background thread
         import threading
-        from ingest.pipeline import process_image
-        threading.Thread(target=process_image, args=(img,), daemon=True).start()
+        threading.Thread(target=_process_and_describe, args=(str(img.id),), daemon=True).start()
 
     return JsonResponse({'id': str(img.id), 'title': img.title}, status=201)
