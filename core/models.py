@@ -209,6 +209,11 @@ class City(models.Model):
         r = results[0]
 
         cc = r['cc']
+
+        # Reject known-bad GPS countries
+        if cc in ('CN', 'IN', 'JP', 'KG', 'MN', 'RU'):
+            return None
+
         continent_code = COUNTRY_TO_CONTINENT.get(cc, 'NA')
         continent = CONTINENT_MAP.get(continent_code, 'Unknown')
         country_name = COUNTRY_NAMES.get(cc, cc)
