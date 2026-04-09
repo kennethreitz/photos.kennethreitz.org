@@ -77,8 +77,7 @@
     <div>
       {% if image.ai_title %}<h1 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem;">{{ image.ai_title }}</h1>{% endif %}
       <p style="color: var(--text-muted);">
-        {{ image.upload_date|date:"N j, Y" }}
-        · {{ image.view_count }} views
+        {{ image.view_count }} views
       </p>
       {% if image.ai_description %}<p style="margin-top: 0.5rem;">{{ image.ai_description }}</p>{% endif %}
       {% if image.description and image.description != image.ai_description %}<p style="margin-top: 0.5rem; color: var(--text-muted);">{{ image.description }}</p>{% endif %}

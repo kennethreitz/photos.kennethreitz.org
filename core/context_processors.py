@@ -4,6 +4,7 @@ from pathlib import Path
 from django.conf import settings
 
 from core.models import SiteConfig
+from gallery.models import Collection
 
 _cache_bust = None
 
@@ -25,5 +26,6 @@ def site_context(request):
         'site_title': config.site_title,
         'site_tagline': config.tagline,
         'analytics_code': config.analytics_code,
+        'has_collections': Collection.objects.exists(),
         'cache_bust': _get_cache_bust(),
     }
