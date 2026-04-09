@@ -33,6 +33,10 @@ DELETE_RULES = [
         'name': "Photos from Dec 22, 2017",
         'filter': Q(exif__date_taken__date='2017-12-22'),
     },
+    {
+        'name': "Photos from Sep 28, 2019",
+        'filter': Q(exif__date_taken__date='2019-09-28'),
+    },
 ]
 
 # ---------------------------------------------------------------------------
