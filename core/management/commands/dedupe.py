@@ -18,6 +18,8 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        from gallery.models import CollectionImage
+
         dry_run = options['dry_run']
         threshold = options['threshold']
 
@@ -58,7 +60,36 @@ class Command(BaseCommand):
 
         if dry_run:
             self.stdout.write(self.style.WARNING(f"\nDry run — {len(to_delete)} images would be deleted."))
-        else:
-            for dup, _ in to_delete:
-                dup.delete()
-            self.stdout.write(self.style.SUCCESS(f"\nDeleted {len(to_delete)} duplicate images."))
+            return
+
+        transferred = 0
+        for dup, original in to_delete:
+            # Transfer collection memberships from dupe to original
+            for ci in CollectionImage.objects.filter(image=dup):
+                if not CollectionImage.objects.filter(collection=ci.collection, image=original).exists():
+                    ci.image = original
+                    ci.save()
+                    transferred += 1
+                else:
+                    ci.delete()
+
+            # Transfer tags from dupe to original
+            for tag in dup.tags.all():
+                original.tags.add(tag)
+
+            # Transfer city if original doesn't have one
+            if not original.city and dup.city:
+                original.city = dup.city
+                original.save(update_fields=['city'])
+
+            # Transfer AI metadata if original doesn't have it
+            if not original.ai_title and dup.ai_title:
+                original.ai_title = dup.ai_title
+                original.ai_description = dup.ai_description
+                original.save(update_fields=['ai_title', 'ai_description'])
+
+            dup.delete()
+
+        self.stdout.write(self.style.SUCCESS(
+            f"\nDeleted {len(to_delete)} duplicates, transferred {transferred} collection memberships."
+        ))
