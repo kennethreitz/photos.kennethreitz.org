@@ -14,6 +14,9 @@ from core.exif import extract_exif
 from core.models import ExifData, Image
 from core.normalization import get_or_create_camera, get_or_create_lens
 
+# Countries with known bad GPS data — skip geocoding
+INVALID_COUNTRIES = {'CN', 'IN', 'JP', 'KG', 'MN', 'RU'}
+
 THUMBNAIL_SIZES = {
     'small': (300, 300),
     'medium': (800, 800),
@@ -79,7 +82,7 @@ def process_image(image: Image) -> None:
             city = City.from_coordinates(
                 float(exif['gps_latitude']), float(exif['gps_longitude'])
             )
-            if city:
+            if city and city.country_code not in INVALID_COUNTRIES:
                 image.city = city
         except Exception:
             pass

@@ -43,7 +43,7 @@ DELETE_RULES = [
 # City rules — clear city for images in countries you've never visited
 # ---------------------------------------------------------------------------
 
-INVALID_COUNTRIES = ['CN', 'IN', 'KG', 'MN', 'RU']  # Bad GPS data — never visited
+INVALID_COUNTRIES = ['CN', 'IN', 'JP', 'KG', 'MN', 'RU']  # Bad GPS data — never visited
 
 FIX_RULES = [
     {
