@@ -157,17 +157,25 @@ def city_list(request):
     cities = (
         City.objects.annotate(image_count=Count('images'))
         .filter(image_count__gt=0)
-        .order_by('continent', 'country', 'name')
+        .order_by('continent', 'country', 'region', 'name')
     )
 
-    # Group by continent > country
+    # Group by continent > country (> state for US)
     grouped = OrderedDict()
     for city in cities:
         if city.continent not in grouped:
             grouped[city.continent] = OrderedDict()
-        if city.country not in grouped[city.continent]:
-            grouped[city.continent][city.country] = []
-        grouped[city.continent][city.country].append(city)
+        country_key = city.country
+        if city.country_code == 'US':
+            # Group US by state
+            state_key = f"United States — {city.region}" if city.region else "United States"
+            if state_key not in grouped[city.continent]:
+                grouped[city.continent][state_key] = []
+            grouped[city.continent][state_key].append(city)
+        else:
+            if country_key not in grouped[city.continent]:
+                grouped[city.continent][country_key] = []
+            grouped[city.continent][country_key].append(city)
 
     return render(request, 'tree/city_list.html', {'grouped': grouped})
 
