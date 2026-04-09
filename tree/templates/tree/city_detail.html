@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block title %}{{ city.display_name }}, {{ city.country }} — {{ site_title }}{% endblock %}
+{% block meta_description %}Photos from {{ city.display_name }}, {{ city.country }}{% endblock %}
+{% block og_title %}{{ city.display_name }}, {{ city.country }}{% endblock %}
+{% block og_description %}Photos from {{ city.display_name }}, {{ city.country }}{% endblock %}
 {% block content %}
 <div class="page-header">
   <h1>{{ city.display_name }}</h1>

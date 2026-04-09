@@ -2,7 +2,10 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.sitemaps import Sitemap
+from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
+from django.views.generic import TemplateView
 
 from core.views import (
     dashboard,
@@ -18,8 +21,97 @@ from core.views import (
     manage_set_visibility,
 )
 
+class ImageSitemap(Sitemap):
+    changefreq = 'monthly'
+    priority = 0.8
+
+    def items(self):
+        from core.models import Image
+        return Image.objects.filter(
+            visibility='public', is_processing=False,
+        ).order_by('-upload_date')[:5000]
+
+    def location(self, obj):
+        return f'/images/{obj.id}/'
+
+    def lastmod(self, obj):
+        return obj.updated_at
+
+
+class StaticSitemap(Sitemap):
+    changefreq = 'daily'
+    priority = 1.0
+
+    def items(self):
+        return ['/', '/cameras/', '/lenses/', '/tags/', '/cities/', '/search/']
+
+    def location(self, item):
+        return item
+
+
+class CameraSitemap(Sitemap):
+    changefreq = 'weekly'
+    priority = 0.7
+
+    def items(self):
+        from core.models import Camera
+        return Camera.objects.all()
+
+    def location(self, obj):
+        return f'/cameras/{obj.slug}/'
+
+
+class LensSitemap(Sitemap):
+    changefreq = 'weekly'
+    priority = 0.7
+
+    def items(self):
+        from core.models import Lens
+        return Lens.objects.all()
+
+    def location(self, obj):
+        return f'/lenses/{obj.slug}/'
+
+
+class TagSitemap(Sitemap):
+    changefreq = 'weekly'
+    priority = 0.5
+
+    def items(self):
+        from core.models import Tag
+        from django.db.models import Count
+        return Tag.objects.annotate(c=Count('images')).filter(c__gte=5).order_by('-c')[:500]
+
+    def location(self, obj):
+        return f'/tags/{obj.slug}/'
+
+
+class CitySitemap(Sitemap):
+    changefreq = 'weekly'
+    priority = 0.6
+
+    def items(self):
+        from core.models import City
+        from django.db.models import Count
+        return City.objects.annotate(c=Count('images')).filter(c__gte=5)
+
+    def location(self, obj):
+        return f'/cities/{obj.slug}/'
+
+
+sitemaps = {
+    'static': StaticSitemap,
+    'images': ImageSitemap,
+    'cameras': CameraSitemap,
+    'lenses': LensSitemap,
+    'tags': TagSitemap,
+    'cities': CitySitemap,
+}
+
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("sitemap.xml", sitemap, {'sitemaps': sitemaps}, name='sitemap'),
+    path("robots.txt", TemplateView.as_view(template_name='robots.txt', content_type='text/plain')),
     path("", home, name="home"),
     path("login/", LoginView.as_view(template_name='registration/login.html'), name="login"),
     path("logout/", LogoutView.as_view(next_page='/'), name="logout"),

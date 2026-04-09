@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block title %}{{ camera.display_name }} — {{ site_title }}{% endblock %}
+{% block meta_description %}Photos taken with the {{ camera.display_name }}{% endblock %}
+{% block og_title %}{{ camera.display_name }}{% endblock %}
+{% block og_description %}Browse photos taken with the {{ camera.display_name }}{% endblock %}
 {% block content %}
 <div class="page-header">
   <h1>{{ camera.display_name }}</h1>

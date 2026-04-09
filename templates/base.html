@@ -4,6 +4,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}{{ site_title }}{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{{ site_tagline }}{% endblock %}">
+  <link rel="canonical" href="https://photos.kennethreitz.org{{ request.path }}">
+
+  <!-- Open Graph -->
+  <meta property="og:site_name" content="{{ site_title }}">
+  <meta property="og:title" content="{% block og_title %}{{ site_title }}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{{ site_tagline }}{% endblock %}">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:url" content="https://photos.kennethreitz.org{{ request.path }}">
+  {% block og_image %}{% endblock %}
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="{% block twitter_card %}summary{% endblock %}">
+  <meta name="twitter:title" content="{% block twitter_title %}{{ site_title }}{% endblock %}">
+  <meta name="twitter:description" content="{% block twitter_description %}{{ site_tagline }}{% endblock %}">
+  {% block twitter_image %}{% endblock %}
+
   <link rel="stylesheet" href="/static/css/style.css?v={{ cache_bust }}">
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   {% if analytics_code %}{{ analytics_code|safe }}{% endif %}
