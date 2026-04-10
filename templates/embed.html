@@ -31,9 +31,6 @@
 <body>
   <div class="pills" id="pills"></div>
   <div class="grid" id="grid"></div>
-  <div class="load-more" id="load-more" style="display:none;">
-    <button onclick="loadMore()">Load more</button>
-  </div>
   <div class="footer">
     <a href="https://photos.kennethreitz.org{% if year %}/?year={{ year }}{% endif %}" target="_blank">See more at photos.kennethreitz.org.</a>
   </div>
@@ -43,6 +40,7 @@
     var offset = 0;
     var loading = false;
     var BATCH = 12;
+    var firstLoad = true;
 
     fetch('/api/images/years').then(r => r.json()).then(function(years) {
       var pills = document.getElementById('pills');
@@ -94,19 +92,19 @@
         });
 
         offset += images.length;
-        if (images.length >= BATCH) {
-          document.getElementById('load-more').style.display = '';
-        } else {
-          document.getElementById('load-more').style.display = 'none';
-        }
+        if (firstLoad) { BATCH = 48; firstLoad = false; }
         loading = false;
+        hasMore = images.length >= BATCH || firstLoad;
       });
     }
 
-    function loadMore() {
-      if (loading) return;
-      loadImages();
-    }
+    var hasMore = true;
+    window.addEventListener('scroll', function() {
+      if (loading || !hasMore) return;
+      if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 200) {
+        loadImages();
+      }
+    });
 
     loadImages();
   </script>
