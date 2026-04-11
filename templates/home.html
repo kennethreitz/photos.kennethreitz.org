@@ -4,9 +4,10 @@
 <link rel="alternate" type="application/json+oembed" href="https://photos.kennethreitz.org/oembed?url=https://photos.kennethreitz.org/&format=json" title="{{ site_title }}">
 {% endblock %}
 {% block content %}
-<div style="text-align: center; padding: 2rem 0 1.5rem;">
-  <h1 style="font-size: 2.5rem; letter-spacing: -0.03em;">{{ site_title }}</h1>
-  <div style="margin-top: 0.75rem;">
+<div style="text-align: center; padding: 3rem 0 2rem;">
+  <h1 style="font-size: 2.5rem; font-weight: 700; letter-spacing: -0.04em;">{{ site_title }}</h1>
+  {% if site_tagline %}<p style="color: var(--text-muted); margin-top: 0.35rem; font-size: 1.05rem; letter-spacing: -0.01em;">{{ site_tagline }}</p>{% endif %}
+  <div style="margin-top: 1rem;">
     <div style="display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: center;">
       <a href="/" class="brand-pill {% if not selected_year %}brand-pill-active{% endif %}">All</a>
       {% for y in years %}

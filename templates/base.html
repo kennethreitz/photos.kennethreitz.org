@@ -21,6 +21,10 @@
   <meta name="twitter:description" content="{% block twitter_description %}{{ site_tagline }}{% endblock %}">
   {% block twitter_image %}{% endblock %}
 
+  <meta name="view-transition" content="same-origin">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/static/css/style.css?v={{ cache_bust }}">
   <script src="https://unpkg.com/htmx.org@2.0.4"></script>
   {% if analytics_code %}{{ analytics_code|safe }}{% endif %}
@@ -37,7 +41,6 @@
       <a href="{% url 'tree:year-list' %}">Years</a>
       {% if has_collections %}<a href="{% url 'gallery:collection-list' %}">Collections</a>{% endif %}
       <a href="{% url 'search:search' %}">Search</a>
-    </div>
     </div>
   </nav>
 

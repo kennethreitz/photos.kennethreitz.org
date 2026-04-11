@@ -45,7 +45,7 @@
   </div>
 
   <!-- Prev / Download / Next -->
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border);">
     {% if prev_image %}<a href="/images/{{ prev_image.id }}/" class="btn" id="prev-link">&larr; Previous</a>{% else %}<span class="btn" style="visibility: hidden;">&larr; Previous</span>{% endif %}
     <details style="position: relative;">
       <summary class="btn">Download</summary>
