@@ -2,6 +2,8 @@ import logging
 import re
 import time
 
+from django.db import OperationalError, close_old_connections
+
 logger = logging.getLogger('core.requests')
 
 BOT_PATTERNS = re.compile(
@@ -16,6 +18,20 @@ def _detect_bot(user_agent: str) -> str | None:
     """Return the bot name from User-Agent, or None if not a bot."""
     match = BOT_PATTERNS.search(user_agent)
     return match.group(0) if match else None
+
+
+class DbRetryMiddleware:
+    """Retry once on stale DB connections (e.g. after Postgres restart)."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        try:
+            return self.get_response(request)
+        except OperationalError:
+            close_old_connections()
+            return self.get_response(request)
 
 
 class RequestLoggingMiddleware:
