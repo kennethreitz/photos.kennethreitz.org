@@ -24,6 +24,9 @@ services:
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     restart: unless-stopped
+    networks:
+      - default
+      - dokploy-network
     healthcheck:
       # ALLOWED_HOSTS includes localhost so this in-container probe passes
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -49,3 +52,12 @@ services:
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     restart: unless-stopped
+    networks:
+      - default
+      - dokploy-network
+
+networks:
+  # Dokploy's shared network — needed to reach the exiftree-db postgres
+  # (a Swarm service) and for Traefik to route to web.
+  dokploy-network:
+    external: true
